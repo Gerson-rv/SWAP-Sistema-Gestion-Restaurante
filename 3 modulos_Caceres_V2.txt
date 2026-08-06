@@ -1,0 +1,23 @@
+Configuracion del Sistema: (No editar el IGV)
+Para prueba Editar solo el nombre)
+
+Nombre         Numero de Yape  
+
+Chifa Union    992263750
+
+---------------------------------------------------------------
+
+Cliente: (editar Telefono para prueba)
+Nombre             Dni             Telefono        Estado
+
+Carlos dimitri     74800262        976654321	  Activo
+Edrian ivanov      78873892	   976045608	  Activo
+Oliver merino      70901485        999781014	  Activo
+
+
+-----------------------------------------------------------------
+
+Mesa: (Editar Numero para prueba)
+Numero  Estado 
+
+15      Activo

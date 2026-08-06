@@ -1,0 +1,203 @@
+/* =============================================
+   producto.css - Estilos del módulo Producto
+   ============================================= */
+
+/* ---------------------------------------------
+   PRODUCTO CARDS (Gestión de Menú)
+   - Tarjetas de productos con imagen, nombre,
+     descripción, categoría, precio y acciones
+   --------------------------------------------- */
+.producto-card {
+    border: 1px solid #e8e0d8;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: #fff;
+}
+
+.producto-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.producto-card-img {
+    background-color: #f5f0eb;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.producto-card-img img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.producto-card-body {
+    padding: 1rem;
+}
+
+.producto-card-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #2c2c2c;
+    margin-bottom: 0.25rem;
+}
+
+.producto-card-desc {
+    font-size: 0.85rem;
+    color: #7a7a7a;
+    margin-bottom: 0.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.producto-card-category {
+    display: inline-block;
+    background-color: #f5f0eb;
+    color: #6b5c50;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.producto-card-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #c85a2a;
+    margin-bottom: 0.75rem;
+}
+
+.producto-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+/* ---------------------------------------------
+   BOTONES DEL MÓDULO PRODUCTO
+   --------------------------------------------- */
+.btn-editar {
+    background-color: #fff;
+    border: 1px solid #d4c8bc;
+    color: #5a4a3e;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-editar:hover {
+    background-color: #f5f0eb;
+    border-color: #b8a89a;
+}
+
+.btn-eliminar-menu {
+    background-color: #fff;
+    border: 1px solid #f5c6c6;
+    color: #c0392b;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-eliminar-menu:hover {
+    background-color: #fef2f2;
+    border-color: #e8a0a0;
+}
+
+/* ---------------------------------------------
+   BADGES DE ESTADO
+   --------------------------------------------- */
+.badge-disponible {
+    background-color: #d4edda;
+    color: #155724;
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.badge-no-disponible {
+    background-color: #f8d7da;
+    color: #721c24;
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* ---------------------------------------------
+   BOTÓN NUEVO PLATO
+   --------------------------------------------- */
+.btn-nuevo-plato {
+    background-color: #c85a2a;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.btn-nuevo-plato:hover {
+    background-color: #a84820;
+    color: white;
+}
+
+/* ---------------------------------------------
+   FILTROS Y BÚSQUEDA
+   --------------------------------------------- */
+.filtro-categoria {
+    border: 1px solid #e8e0d8;
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.9rem;
+    color: #5a4a3e;
+    background-color: #fff;
+}
+
+.filtro-categoria:focus {
+    border-color: #c85a2a;
+    box-shadow: 0 0 0 0.15rem rgba(200, 90, 42, 0.15);
+}
+
+.buscar-plato {
+    border: 1px solid #e8e0d8;
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+.buscar-plato:focus {
+    border-color: #c85a2a;
+    box-shadow: 0 0 0 0.15rem rgba(200, 90, 42, 0.15);
+}
+
+/* ---------------------------------------------
+   RESPONSIVE - Android Tablets
+   --------------------------------------------- */
+@media (max-width: 768px) {
+    .producto-card-img { height: 120px; padding: 0.5rem; }
+    .producto-card-body { padding: 0.75rem; }
+    .producto-card-title { font-size: 0.85rem; }
+    .producto-card-price { font-size: 0.95rem; margin-bottom: 0.5rem; }
+    .producto-card-actions { gap: 0.3rem; }
+    .btn-editar, .btn-eliminar-menu { font-size: 0.72rem; padding: 0.25rem 0.5rem; }
+    .filtro-categoria, .buscar-plato { font-size: 0.8rem; padding: 0.3rem 0.6rem; }
+}
+
+@media (max-width: 480px) {
+    .producto-card-img { height: 80px; }
+    .producto-card-title { font-size: 0.75rem; }
+    .producto-card-price { font-size: 0.8rem; }
+    .producto-card-body { padding: 0.5rem; }
+    .btn-editar, .btn-eliminar-menu { font-size: 0.65rem; padding: 0.2rem 0.4rem; }
+    .filtro-categoria, .buscar-plato { font-size: 0.75rem; padding: 0.25rem 0.5rem; }
+}

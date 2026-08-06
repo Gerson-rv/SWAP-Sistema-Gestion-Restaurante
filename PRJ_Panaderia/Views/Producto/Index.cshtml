@@ -1,0 +1,208 @@
+@model IEnumerable<PRJ_Panaderia.Models.Producto>
+
+@{
+    ViewData["Title"] = "Gestión de Menú";
+}
+
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Gestión de Menú</h2>
+            <p class="text-muted mb-0">Administra los platos y categorías del restaurante</p>
+        </div>
+        @if (User.IsInRole("Admin") || User.IsInRole("Cajero"))
+        {
+            <a asp-action="Create" class="btn btn-nuevo-plato">
+                <i class="bi bi-plus-lg"></i> Nuevo plato
+            </a>
+        }
+    </div>
+
+    <!-- Filtros -->
+    <div class="d-flex gap-3 mb-4">
+        <select class="form-select filtro-categoria" style="width: auto;" id="filtroCategoria">
+            <option value="">Todas las categorías</option>
+            @foreach (var cat in Model.Select(p => p.NombreCategoria).Distinct().OrderBy(c => c))
+            {
+                <option value="@cat">@cat</option>
+            }
+        </select>
+        <input type="text" class="form-control buscar-plato" style="width: 250px;" placeholder="Buscar plato..." id="buscarPlato" />
+    </div>
+
+    <!-- Grid de productos -->
+    <div class="row g-4" id="contenedorProductos">
+        @if (Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <div class="col-xl-4 col-lg-6 col-md-6 producto-item" data-categoria="@item.NombreCategoria" data-nombre="@item.Nombre.ToLower()">
+                    <div class="producto-card h-100">
+                        <!-- Imagen -->
+                        <div class="producto-card-img">
+                            @if (!string.IsNullOrEmpty(item.RutaImagen))
+                            {
+                                <img src="~/@item.RutaImagen" alt="@item.Nombre" />
+                            }
+                            else
+                            {
+                                <div class="d-flex align-items-center justify-content-center h-100" style="background:#212529;color:#fff;font-size:2rem;font-weight:700;">
+                                    @item.Nombre.Substring(0, 1).ToUpper()
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Cuerpo -->
+                        <div class="producto-card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h5 class="producto-card-title mb-0">@item.Nombre</h5>
+                                @if (item.Activo)
+                                {
+                                    <span class="badge-disponible">Disponible</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-no-disponible">No disponible</span>
+                                }
+                            </div>
+
+                            <span class="producto-card-category">@item.NombreCategoria</span>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="producto-card-price">S/ @item.Precio.ToString("N2")</span>
+
+                                <div class="producto-card-actions">
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Cajero"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.IdProducto" class="btn btn-editar">
+                                            <i class="bi bi-pencil-square"></i> Editar
+                                        </a>
+                                        <button type="button" class="btn btn-eliminar-menu btn-eliminar"
+                                                data-id="@item.IdProducto" data-nombre="@item.Nombre">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                    <p class="mt-3">No hay productos registrados.</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/producto.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var mensajeExito = '@TempData["Exito"]';
+            if (mensajeExito) {
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: mensajeExito,
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#28a745'
+                });
+            }
+
+            // Filtro por categoría
+            var filtroCategoria = document.getElementById('filtroCategoria');
+            var buscarPlato = document.getElementById('buscarPlato');
+
+            function filtrarProductos() {
+                var categoria = filtroCategoria.value.toLowerCase();
+                var busqueda = buscarPlato.value.toLowerCase();
+                var items = document.querySelectorAll('.producto-item');
+
+                items.forEach(function (item) {
+                    var cat = item.getAttribute('data-categoria').toLowerCase();
+                    var nombre = item.getAttribute('data-nombre');
+
+                    var coincideCategoria = !categoria || cat === categoria;
+                    var coincideBusqueda = !busqueda || nombre.includes(busqueda);
+
+                    if (coincideCategoria && coincideBusqueda) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+
+            filtroCategoria.addEventListener('change', filtrarProductos);
+            buscarPlato.addEventListener('input', filtrarProductos);
+
+            // Eliminar
+            document.querySelectorAll('.btn-eliminar').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+                    var nombre = this.getAttribute('data-nombre');
+
+                    fetch('/Producto/ValidarEliminar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'id=' + encodeURIComponent(id)
+                    })
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        if (!data.success) {
+                            Swal.fire('No permitido', data.message, 'warning');
+                            return;
+                        }
+
+                        Swal.fire({
+                            title: '¿Está seguro?',
+                            text: "¿Está seguro que desea eliminar \"" + nombre + "\"? Se eliminará la imagen asociada.",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#dc3545',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: 'Sí, eliminar',
+                            cancelButtonText: 'Cancelar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                fetch('/Producto/Delete', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                    body: 'id=' + encodeURIComponent(id)
+                                })
+                                .then(function (res) { return res.json(); })
+                                .then(function (data) {
+                                    if (data.success) {
+                                        Swal.fire({
+                                            title: '¡Eliminado!',
+                                            text: data.message,
+                                            icon: 'success',
+                                            confirmButtonText: 'OK',
+                                            confirmButtonColor: '#28a745'
+                                        }).then(function () {
+                                            window.location.reload();
+                                        });
+                                    }
+                                })
+                                .catch(function () {
+                                    Swal.fire('Error', 'Ocurrió un error al eliminar.', 'error');
+                                });
+                            }
+                        });
+                    });
+                });
+            });
+        });
+    </script>
+}

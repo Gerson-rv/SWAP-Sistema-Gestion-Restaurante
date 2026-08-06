@@ -1,0 +1,326 @@
+/* =============================================
+   SideBarAdministrativo.css
+   Estilos del sidebar administrativo responsive
+   ============================================= */
+
+/* ---------------------------------------------
+   VARIABLES CSS (Custom Properties)
+   - Definen colores y dimensiones globales
+   - Se usan con var(--nombre-variable)
+   --------------------------------------------- */
+:root {
+    --sidebar-width: 260px;          /* Ancho del sidebar en desktop */
+    --sidebar-bg: #1a1a2e;           /* Color de fondo principal (azul oscuro) */
+    --sidebar-hover: #16213e;        /* Color al pasar el mouse (azul más oscuro) */
+    --sidebar-active: #c0392b;       /* Color del item activo (rojo) */
+    --sidebar-text: #a0a0b8;         /* Color de texto normal (gris azulado) */
+    --sidebar-text-active: #ffffff;  /* Color de texto activo/hover (blanco) */
+    --sidebar-brand-bg: #16213e;     /* Fondo del brand/logo */
+}
+
+/* ---------------------------------------------
+   RESET BÁSICO
+   - Altura completa del viewport
+   - Sin márgenes ni paddings
+   - Overflow horizontal oculto
+   --------------------------------------------- */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* ---------------------------------------------
+   BODY
+   - Tipografía SegUI UI con fallbacks
+   - Color de fondo gris claro
+   --------------------------------------------- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f9;
+}
+
+/* ---------------------------------------------
+   SIDEBAR (Contenedor principal)
+   - Fijo a la izquierda de la pantalla
+   - Altura completa del viewport (100vh)
+   - Gradiente de fondo oscuro
+   - Flexbox column para distribuir hijos
+   - z-index alto para estar sobre el contenido
+   - Transición suave para responsive
+   --------------------------------------------- */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    background: linear-gradient(180deg, var(--sidebar-bg) 0%, #0f0f23 100%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+}
+
+/* ---------------------------------------------
+   BRAND (Logo/Nombre del sistema)
+   - Centrado con padding generoso
+   - Fondo ligeramente diferente al sidebar
+   - Borde inferior sutil
+   --------------------------------------------- */
+.sidebar-brand {
+    padding: 1.5rem 1.25rem;
+    background-color: var(--sidebar-brand-bg);
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Ícono del brand (fuego/chispa) */
+.sidebar-brand .brand-icon {
+    font-size: 2.5rem;
+    color: #e74c3c;  /* Rojo Bootstrap */
+}
+
+/* Título principal "Chifa Percy" */
+.sidebar-brand .brand-title {
+    margin: 0.25rem 0 0;
+    color: var(--sidebar-text-active);
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: 0.5px;
+}
+
+/* Subtítulo "Sabor que conquista" */
+.sidebar-brand .brand-subtitle {
+    color: #e74c3c;  /* Rojo, same as icon */
+    font-size: 0.8rem;
+    font-style: italic;
+    font-weight: 500;
+}
+
+/* ---------------------------------------------
+   MENÚ DE NAVEGACIÓN
+   - Flex-grow para ocupar el espacio disponible
+   - Padding vertical para separación
+   --------------------------------------------- */
+.sidebar-menu {
+    flex: 1;
+    padding: 0.75rem 0;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+/* Items del menú (enlaces) */
+.sidebar-menu .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    gap: 0.75rem;
+    touch-action: manipulation;
+    cursor: pointer;
+}
+
+/* Íconos de los items */
+.sidebar-menu .nav-link i {
+    font-size: 1.15rem;
+    width: 24px;
+    text-align: center;
+}
+
+/* Texto de los items */
+.sidebar-menu .nav-link span {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Hover: fondo más oscuro + borde rojo izquierdo */
+.sidebar-menu .nav-link:hover {
+    background-color: var(--sidebar-hover);
+    color: var(--sidebar-text-active);
+    border-left-color: var(--sidebar-active);
+}
+
+/* Activo: fondo rojo + borde rojo izquierdo */
+.sidebar-menu .nav-link.active {
+    background-color: var(--sidebar-active);
+    color: var(--sidebar-text-active);
+    border-left-color: var(--sidebar-active);
+}
+
+/* Etiqueta de sección "MENÚ" */
+.sidebar-menu .menu-label {
+    padding: 0.75rem 1.5rem 0.35rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(160,160,184,0.5);  /* Gris semi-transparente */
+    font-weight: 600;
+}
+
+/* ---------------------------------------------
+   FOOTER DEL SIDEBAR
+   - Parte inferior con info del restaurante
+   - Fondo ligeramente más oscuro
+   - Borde superior sutil
+   --------------------------------------------- */
+.sidebar-footer {
+    padding: 1.25rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    background-color: rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+/* Ícono de tienda */
+.sidebar-footer .footer-icon {
+    font-size: 2rem;
+    color: var(--sidebar-text);
+    margin-bottom: 0.5rem;
+}
+
+/* Texto "Restaurante" */
+.sidebar-footer h6 {
+    margin: 0;
+    color: var(--sidebar-text-active);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* Texto "Desde 2018" */
+.sidebar-footer small {
+    color: var(--sidebar-text);
+    font-size: 0.75rem;
+}
+
+/* ---------------------------------------------
+   CONTENIDO PRINCIPAL
+   - Flexbox column para sticky footer
+   - Margen izquierdo igual al ancho del sidebar
+   - min-height: 100vh para llenar la pantalla
+   - Transición suave al colapsar sidebar
+   --------------------------------------------- */
+.main-content {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 0.3s ease;
+}
+
+/* El container-fluid crece para empujar el footer */
+.main-content > .container-fluid {
+    flex-grow: 1;
+}
+
+/* ---------------------------------------------
+   TOPBAR (Solo visible en móvil)
+   - Barra superior con botón hamburguesa
+   - Oculta por defecto (display: none)
+   - Se muestra en responsive (< 992px)
+   --------------------------------------------- */
+.topbar {
+    display: none;
+    background: var(--sidebar-bg);
+    padding: 0.75rem 1rem;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Botón hamburguesa */
+.topbar .btn-toggle-sidebar {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+/* Nombre del sistema en topbar */
+.topbar .topbar-brand {
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* ---------------------------------------------
+   OVERLAY (Fondo oscuro al abrir sidebar en móvil)
+   - Cubre toda la pantalla
+   - z-index debajo del sidebar (999 < 1000)
+   - Se muestra con clase .show
+   --------------------------------------------- */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+}
+
+.sidebar-overlay.show {
+    display: block;
+}
+
+/* ---------------------------------------------
+   RESPONSIVE (< 992px = Móvil/Tablet pequeño)
+   - Sidebar se oculta a la izquierda
+   - Con clase .show se despliega
+   - Contenido sin margen izquierdo
+   - Topbar se muestra
+   --------------------------------------------- */
+@media (max-width: 991.98px) {
+    .sidebar {
+        transform: translateX(-100%);  /* Oculto a la izquierda */
+    }
+
+    .sidebar.show {
+        transform: translateX(0);  /* Se despliega */
+    }
+
+    .main-content {
+        margin-left: 0;  /* Sin margen en móvil */
+    }
+
+    .topbar {
+        display: flex;  /* Se muestra la topbar */
+    }
+}
+
+/* ---------------------------------------------
+   SCROLLBAR DEL SIDEBAR
+   - Ancho delgado (4px)
+   - Thumb semi-transparente
+   - Mejora la estética del scroll
+   --------------------------------------------- */
+.sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+}
+
+/* ---------------------------------------------
+   FOOTER DE LA PÁGINA
+   - Texto centrado y gris
+   - Borde superior separador
+   - Fondo blanco
+   - Sticky footer: se mantiene abajo con flexbox
+   --------------------------------------------- */
+.page-footer {
+    padding: 1rem;
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.85rem;
+    border-top: 1px solid #dee2e6;
+    background: white;
+}

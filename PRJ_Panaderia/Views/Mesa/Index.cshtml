@@ -1,0 +1,299 @@
+@model IEnumerable<PRJ_Panaderia.Models.Mesa>
+
+@{
+    ViewData["Title"] = "Gestión de Mesas";
+    var estadoFiltro = ViewBag.EstadoFiltro as string;
+}
+
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="bi bi-grid-3x3-gap"></i> Gestión de Mesas</h2>
+            <p class="text-muted mb-0">Administra y visualiza el estado de todas las mesas del restaurante.</p>
+        </div>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Nueva Mesa
+            </a>
+        }
+    </div>
+
+    <!-- Filtro de estado -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Estado</label>
+                    <select name="estado" class="form-select">
+                        <option value="">Todos</option>
+                        @if (estadoFiltro == "Libre")
+                        {
+                            <option value="Libre" selected>Libre</option>
+                        }
+                        else
+                        {
+                            <option value="Libre">Libre</option>
+                        }
+                        @if (estadoFiltro == "Ocupada")
+                        {
+                            <option value="Ocupada" selected>Ocupada</option>
+                        }
+                        else
+                        {
+                            <option value="Ocupada">Ocupada</option>
+                        }
+                        @if (estadoFiltro == "Reservada")
+                        {
+                            <option value="Reservada" selected>Reservada</option>
+                        }
+                        else
+                        {
+                            <option value="Reservada">Reservada</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-8 d-flex gap-2">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-search"></i> Filtrar
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-counterclockwise"></i> Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tarjetas de mesas -->
+    <div class="row g-4">
+        @if (Model.Any())
+        {
+            @foreach (var mesa in Model)
+            {
+                var colorEstado = mesa.Estado switch
+                {
+                    "Libre" => "#198754",
+                    "Ocupada" => "#dc3545",
+                    "Reservada" => "#ffc107",
+                    _ => "#6c757d"
+                };
+                var colorBg = mesa.Estado switch
+                {
+                    "Libre" => "#d1e7dd",
+                    "Ocupada" => "#f8d7da",
+                    "Reservada" => "#fff3cd",
+                    _ => "#e2e3e5"
+                };
+                var textoEstado = !mesa.Activo ? "Inactiva" : mesa.Estado;
+
+                <div class="col-xl-3 col-lg-4 col-md-6 col-6">
+                    <div class="card shadow-sm h-100" style="border-left: 4px solid @(mesa.Activo ? colorEstado : "#6c757d");">
+                        <div class="card-body text-center">
+                            <!-- Badge de estado -->
+                            <div class="mb-3">
+                                @if (!mesa.Activo)
+                                {
+                                    <span class="badge bg-secondary">
+                                        <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i> Inactiva
+                                    </span>
+                                }
+                                else if (mesa.Estado == "Libre")
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i> Libre
+                                    </span>
+                                }
+                                else if (mesa.Estado == "Ocupada")
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i> Ocupada
+                                    </span>
+                                }
+                                else if (mesa.Estado == "Reservada")
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i> Reservada
+                                    </span>
+                                }
+                            </div>
+
+                            <!-- Ícono de mesa -->
+                            <div class="mb-3">
+                                @if (!mesa.Activo)
+                                {
+                                    <img src="~/images/mesas/mesa-inactiva.png" alt="Mesa inactiva" class="mesa-icon" />
+                                }
+                                else if (mesa.Estado == "Libre")
+                                {
+                                    <img src="~/images/mesas/mesa-libre.png" alt="Mesa libre" class="mesa-icon" />
+                                }
+                                else if (mesa.Estado == "Ocupada")
+                                {
+                                    <img src="~/images/mesas/mesa-ocupada.png" alt="Mesa ocupada" class="mesa-icon" />
+                                }
+                                else if (mesa.Estado == "Reservada")
+                                {
+                                    <img src="~/images/mesas/mesa-reservada.png" alt="Mesa reservada" class="mesa-icon" />
+                                }
+                            </div>
+
+                            <!-- Número de mesa -->
+                            <h5 class="card-title fw-bold">Mesa @mesa.Numero</h5>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="card-footer bg-transparent border-top-0 d-flex gap-2 justify-content-center pb-3">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a asp-action="Edit" asp-route-id="@mesa.IdMesa" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-pencil-square"></i> Editar
+                                </a>
+                                <button type="button" class="btn btn-outline-danger btn-sm btn-eliminar"
+                                        data-id="@mesa.IdMesa" data-numero="@mesa.Numero">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm btn-cambiar-estado"
+                                        data-id="@mesa.IdMesa" data-activo="@mesa.Activo.ToString().ToLower()">
+                                    <i class="bi bi-toggle2-on"></i> @(mesa.Activo ? "Desactivar" : "Activar")
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                    <p class="mt-3">No hay mesas registradas.</p>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Leyenda de estados -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-4 justify-content-center">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success"><i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i> Libre</span>
+                    <small class="text-muted">Mesa disponible</small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-danger"><i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i> Ocupada</span>
+                    <small class="text-muted">Mesa con pedido activo</small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-warning text-dark"><i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i> Reservada</span>
+                    <small class="text-muted">Mesa reservada</small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-secondary"><i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i> Inactiva</span>
+                    <small class="text-muted">Mesa deshabilitada</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <input type="hidden" id="msgExito" value="@((TempData["Exito"] ?? "").ToString())" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var msg = document.getElementById('msgExito');
+            if (msg && msg.value) {
+                Swal.fire({ title: 'Exito!', text: msg.value, icon: 'success', confirmButtonText: 'OK', confirmButtonColor: '#28a745' });
+            }
+
+            document.querySelectorAll('.btn-cambiar-estado').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+                    var activo = this.getAttribute('data-activo') === 'true';
+                    var nuevoEstado = !activo;
+                    var textoAccion = nuevoEstado ? "activar" : "desactivar";
+
+                    Swal.fire({
+                        title: '¿Está seguro?',
+                        text: "¿Está seguro que desea " + textoAccion + " esta mesa?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, ' + textoAccion,
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch('/Mesa/CambiarEstado', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: 'id=' + encodeURIComponent(id) + '&activo=' + encodeURIComponent(nuevoEstado)
+                            })
+                            .then(function (res) { return res.json(); })
+                            .then(function (data) {
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: '¡Actualizado!',
+                                        text: data.message,
+                                        icon: 'success',
+                                        confirmButtonText: 'OK',
+                                        confirmButtonColor: '#28a745'
+                                    }).then(function () {
+                                        window.location.reload();
+                                    });
+                                }
+                            })
+                            .catch(function () {
+                                Swal.fire('Error', 'Ocurrió un error al cambiar el estado.', 'error');
+                            });
+                        }
+                    });
+                });
+            });
+
+            document.querySelectorAll('.btn-eliminar').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+
+                    Swal.fire({
+                        title: '¿Está seguro?',
+                        text: "¿Está seguro que desea eliminar esta mesa?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch('/Mesa/Delete', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: 'id=' + encodeURIComponent(id)
+                            })
+                            .then(function (res) { return res.json(); })
+                            .then(function (data) {
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: '¡Eliminado!',
+                                        text: data.message,
+                                        icon: 'success',
+                                        confirmButtonText: 'OK',
+                                        confirmButtonColor: '#28a745'
+                                    }).then(function () {
+                                        window.location.reload();
+                                    });
+                                }
+                            })
+                            .catch(function () {
+                                Swal.fire('Error', 'Ocurrió un error al eliminar.', 'error');
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}

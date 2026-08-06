@@ -1,0 +1,83 @@
+/* =============================================
+   Impresión - Comanda y documentos impresos
+   ============================================= */
+
+body {
+    background-color: #f4f6f9;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px;
+}
+
+/* Contenedor centrado */
+.dp-impresion-container { max-width: 400px; margin: 0 auto; }
+
+/* Tarjeta con borde punteado (estilo recibo) */
+.dp-impresion-card {
+    background: white;
+    border: 2px dashed #333;
+    border-radius: 0;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+/* Cabecera de la comanda */
+.dp-impresion-header {
+    text-align: center;
+    border-bottom: 2px dashed #333;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.dp-impresion-header h2 { font-size: 1.3rem; font-weight: bold; margin: 0; }
+
+/* Información del pedido */
+.dp-impresion-info { font-size: 0.85rem; margin-bottom: 15px; }
+.dp-impresion-info p { margin-bottom: 3px; }
+
+/* Lista de productos */
+.dp-impresion-productos {
+    border-top: 2px dashed #333;
+    border-bottom: 2px dashed #333;
+    padding: 10px 0;
+    margin-bottom: 15px;
+}
+
+.dp-impresion-producto {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.dp-impresion-producto .cantidad { font-weight: bold; min-width: 30px; }
+
+/* Notas especiales */
+.dp-impresion-nota {
+    border-bottom: 2px dashed #333;
+    padding: 10px 0;
+    margin-bottom: 15px;
+    font-size: 0.85rem;
+}
+
+/* Pie de página */
+.dp-impresion-footer {
+    text-align: center;
+    border-top: 2px dashed #333;
+    border-bottom: 2px dashed #333;
+    padding: 10px 0;
+    margin-top: 15px;
+}
+
+.dp-impresion-footer h3 { font-size: 1.2rem; margin: 0; }
+.dp-impresion-footer small { font-style: italic; }
+
+/* Botones de acción */
+.dp-impresion-botones { text-align: center; margin-top: 20px; }
+.dp-impresion-botones .btn { margin: 0 5px; }
+
+/* Impresión: ocultar botones, fondo blanco, ancho completo */
+@media print {
+    body { background: white; padding: 0; }
+    .dp-impresion-botones { display: none !important; }
+    .dp-impresion-container { max-width: 100%; }
+}

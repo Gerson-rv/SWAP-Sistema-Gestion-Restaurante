@@ -1,0 +1,130 @@
+@model IEnumerable<PRJ_Panaderia.Models.Categoria>
+
+@{
+    ViewData["Title"] = "Lista de Categorías";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-tags"></i> Gestión de Categorías</h2>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Crear Nueva Categoría
+        </a>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Estado</th>
+                        <th class="text-center" style="width: 220px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr class="@(item.Activo ? "" : "table-secondary")">
+                                <td>@item.IdCategoria</td>
+                                <td>@item.Nombre</td>
+                                <td>
+                                    @if (item.Activo)
+                                    {
+                                        <span class="badge bg-success">ACTIVO</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">INACTIVO</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="Edit" asp-route-id="@item.IdCategoria" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil-square"></i> Editar
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger btn-eliminar"
+                                            data-id="@item.IdCategoria" data-nombre="@item.Nombre">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">
+                                No hay categorías registradas.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <input type="hidden" id="msgExito" value="@((TempData["Exito"] ?? "").ToString())" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var msg = document.getElementById('msgExito');
+            if (msg && msg.value) {
+                Swal.fire({ title: 'Exito!', text: msg.value, icon: 'success', confirmButtonText: 'OK', confirmButtonColor: '#28a745' });
+            }
+
+            document.querySelectorAll('.btn-eliminar').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+
+                    Swal.fire({
+                        title: '¿Está seguro?',
+                        text: "¿Está seguro que desea eliminar esta categoría?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch('/Categoria/Delete', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: 'id=' + encodeURIComponent(id)
+                            })
+                            .then(function (res) { return res.json(); })
+                            .then(function (data) {
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: 'Eliminado!',
+                                        text: data.message,
+                                        icon: 'success',
+                                        confirmButtonText: 'OK',
+                                        confirmButtonColor: '#28a745'
+                                    }).then(function () {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'No se puede eliminar',
+                                        text: data.message,
+                                        icon: 'warning',
+                                        confirmButtonText: 'Entendido',
+                                        confirmButtonColor: '#ffc107'
+                                    });
+                                }
+                            })
+                            .catch(function () {
+                                Swal.fire('Error', 'Ocurrió un error al eliminar.', 'error');
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}

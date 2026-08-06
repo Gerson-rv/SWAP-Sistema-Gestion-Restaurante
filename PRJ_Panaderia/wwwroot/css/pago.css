@@ -1,0 +1,113 @@
+/* =============================================
+   Pago - Comprobante de pago
+   ============================================= */
+
+body {
+    background-color: #f4f6f9;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px;
+}
+
+/* Contenedor centrado */
+.pg-comprobante-container { max-width: 420px; margin: 0 auto; }
+
+/* Tarjeta con borde punteado (estilo recibo) */
+.pg-comprobante-card {
+    background: white;
+    border: 2px dashed #333;
+    border-radius: 0;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+/* Cabecera del comprobante */
+.pg-comprobante-header {
+    text-align: center;
+    border-bottom: 2px dashed #333;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.pg-comprobante-header h2 { font-size: 1.3rem; font-weight: bold; margin: 0; }
+.pg-comprobante-header h3 { font-size: 1rem; margin: 0; }
+.pg-comprobante-header h4 { font-size: 0.9rem; margin: 0; color: #6c757d; }
+
+/* Información del pago */
+.pg-comprobante-info { font-size: 0.85rem; margin-bottom: 15px; }
+.pg-comprobante-info p { margin-bottom: 3px; }
+
+/* Tabla de productos */
+.pg-comprobante-productos {
+    border-top: 1px dashed #ccc;
+    border-bottom: 1px dashed #ccc;
+    padding: 10px 0;
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+}
+
+.pg-comprobante-productos table th { font-size: 0.75rem; color: #6c757d; }
+.pg-comprobante-productos table td { padding: 2px 0; }
+
+.pg-total-row td {
+    border-top: 1px solid #333 !important;
+    padding-top: 5px !important;
+}
+
+/* Detalle de pago */
+.pg-comprobante-pago {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+/* Pie de página del comprobante */
+.pg-comprobante-footer {
+    text-align: center;
+    border-top: 2px dashed #333;
+    border-bottom: 2px dashed #333;
+    padding: 10px 0;
+    margin-top: 15px;
+}
+
+/* Botones de acción */
+.pg-comprobante-botones { text-align: center; margin-top: 20px; }
+
+/* Imagen QR de Yape */
+.pg-qr-image { width: 180px; height: 180px; margin: 10px auto; display: block; }
+
+/* Impresión: ocultar botones, fondo blanco */
+@media print {
+    body { background: white; padding: 0; }
+    .pg-comprobante-botones { display: none !important; }
+    .pg-comprobante-card { border: 1px solid #333; }
+}
+
+/* Yape total encima del QR */
+.pg-yape-total {
+    background: #f0f6ff;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid #b6d4fe;
+}
+
+/* Responsive - Android Tablets */
+@media (max-width: 768px) {
+    body { padding: 10px; }
+    .pg-comprobante-container { max-width: 100%; }
+    .pg-comprobante-card { padding: 15px; }
+    .pg-comprobante-header h2 { font-size: 1.1rem; }
+    .pg-comprobante-header h3 { font-size: 0.85rem; }
+    .pg-comprobante-productos { font-size: 0.8rem; }
+    .pg-comprobante-info { font-size: 0.8rem; }
+    .pg-comprobante-pago { font-size: 0.8rem; padding: 10px; }
+    .pg-qr-image { width: 150px; height: 150px; }
+    .pg-yape-total { padding: 10px; }
+}
+
+@media (max-width: 480px) {
+    .pg-comprobante-card { padding: 10px; }
+    .pg-comprobante-header h2 { font-size: 1rem; }
+    .pg-qr-image { width: 130px; height: 130px; }
+}

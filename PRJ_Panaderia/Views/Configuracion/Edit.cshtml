@@ -1,0 +1,97 @@
+@model PRJ_Panaderia.Models.ConfiguracionSistema
+
+@{
+    ViewData["Title"] = "Configuración del Sistema";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-7 col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0"><i class="bi bi-gear"></i> Configuración del Sistema</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+                        <input type="hidden" asp-for="ConfigID" />
+
+                        <!-- Nombre Negocio -->
+                        <div class="mb-3">
+                            <label asp-for="NombreNegocio" class="form-label fw-semibold"></label>
+                            <input asp-for="NombreNegocio" class="form-control" placeholder="Ingrese nombre del negocio" maxlength="80" />
+                            <span asp-validation-for="NombreNegocio" class="text-danger"></span>
+                        </div>
+
+                        <!-- RUC -->
+                        <div class="mb-3">
+                            <label asp-for="RUC" class="form-label fw-semibold"></label>
+                            <input asp-for="RUC" class="form-control" placeholder="Ingrese RUC (11 dígitos)" maxlength="11" />
+                            <span asp-validation-for="RUC" class="text-danger"></span>
+                        </div>
+
+                        <!-- Razón Social -->
+                        <div class="mb-3">
+                            <label asp-for="RazonSocial" class="form-label fw-semibold"></label>
+                            <input asp-for="RazonSocial" class="form-control" placeholder="Ingrese razón social" maxlength="120" />
+                            <span asp-validation-for="RazonSocial" class="text-danger"></span>
+                        </div>
+
+                        <!-- Fila: IGV | Moneda -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="IGV_Porcentaje" class="form-label fw-semibold">IGV %</label>
+                                <input asp-for="IGV_Porcentaje" class="form-control" type="number" step="0.01" min="0" max="100" placeholder="18.00" />
+                                <span asp-validation-for="IGV_Porcentaje" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Moneda" class="form-label fw-semibold">Moneda</label>
+                                <select asp-for="Moneda" class="form-select">
+                                    <option value="PEN">PEN - Sol Peruano</option>
+                                    <option value="USD">USD - Dólar Americano</option>
+                                </select>
+                                <span asp-validation-for="Moneda" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Número Yape -->
+                        <div class="mb-3">
+                            <label asp-for="NumeroYape" class="form-label fw-semibold">Número Yape</label>
+                            <input asp-for="NumeroYape" class="form-control" placeholder="Ej: 987654321" maxlength="15" />
+                            <span asp-validation-for="NumeroYape" class="text-danger"></span>
+                            <small class="text-muted">Número telefónico para pagos con Yape</small>
+                        </div>
+
+                        <!-- Correo del Sistema -->
+                        <div class="mb-3">
+                            <label asp-for="Correo" class="form-label fw-semibold">Correo del Sistema</label>
+                            <input asp-for="Correo" class="form-control" type="email" placeholder="Ej: ventas@chifapercy.com" maxlength="100" />
+                            <span asp-validation-for="Correo" class="text-danger"></span>
+                            <small class="text-muted">Correo donde se envían las confirmaciones de pago</small>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <button type="submit" class="btn btn-dark">
+                                <i class="bi bi-save"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var msg = document.getElementById('msgExito');
+            if (msg && msg.value) {
+                Swal.fire({ title: 'Exito!', text: msg.value, icon: 'success', confirmButtonText: 'OK', confirmButtonColor: '#28a745' });
+            }
+        });
+    </script>
+    <input type="hidden" id="msgExito" value="@((TempData["Exito"] ?? "").ToString())" />
+}

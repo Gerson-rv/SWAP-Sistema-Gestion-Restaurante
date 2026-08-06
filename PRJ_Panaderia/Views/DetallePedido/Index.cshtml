@@ -1,0 +1,214 @@
+@model IEnumerable<PRJ_Panaderia.Models.Pedido>
+
+@{
+    ViewData["Title"] = "Listado de Pedidos";
+    var mesas = ViewBag.Mesas as List<PRJ_Panaderia.Models.Mesa> ?? new List<PRJ_Panaderia.Models.Mesa>();
+    int paginaActual = ViewBag.PaginaActual ?? 1;
+    int totalPaginas = ViewBag.TotalPaginas ?? 1;
+    var mesaIdFiltro = ViewBag.MesaId as int?;
+    var estadoEntregaFiltro = ViewBag.EstadoEntrega as string;
+    var estadoPagoFiltro = ViewBag.EstadoPago as string;
+    var busquedaFiltro = ViewBag.Busqueda as string;
+}
+
+<div class="container mt-4 dp-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-list-ul"></i> Listado de Pedidos</h2>
+        <a asp-controller="Pedido" asp-action="Index" class="btn btn-primary">
+            <i class="bi bi-bag-check"></i> Ir a Pedidos
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow dp-filtros-card">
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Mesa</label>
+                    <select name="mesaId" class="form-select">
+                        <option value="">Todas</option>
+                        @foreach (var mesa in mesas)
+                        {
+                            <option value="@mesa.IdMesa" selected="@(mesaIdFiltro == mesa.IdMesa)">Mesa @mesa.Numero</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Estado Entrega</label>
+                    <select name="estadoEntrega" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="Pendiente" selected="@(estadoEntregaFiltro == "Pendiente")">Pendiente</option>
+                        <option value="Servido" selected="@(estadoEntregaFiltro == "Servido")">Servido</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Estado Pago</label>
+                    <select name="estadoPago" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="Pendiente" selected="@(estadoPagoFiltro == "Pendiente")">Pendiente</option>
+                        <option value="Pagado" selected="@(estadoPagoFiltro == "Pagado")">Pagado</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Buscar</label>
+                    <input type="text" name="busqueda" class="form-control" placeholder="# Pedido, Mesa, Mozo..."
+                           value="@busquedaFiltro" />
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-dark">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card shadow dp-tabla-card mt-3">
+        <div class="card-body">
+            <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>COMANDA</th>
+                        <th>MESA</th>
+                        <th>MOZO</th>
+                        <th>ENTREGA</th>
+                        <th>PAGO</th>
+                        <th>FECHA</th>
+                        <th>TOTAL</th>
+                        <th class="text-center" style="width: 200px;">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        int num = 1;
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@num</td>
+                                <td><span class="badge bg-dark dp-comanda-badge">C-@item.PedidoID.ToString("D4")</span></td>
+                                <td>
+                                    @if (item.MesaID.HasValue && item.NumeroMesa > 0)
+                                    {
+                                        <span>Mesa @item.NumeroMesa</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Para llevar</span>
+                                    }
+                                </td>
+                                <td>@item.NombreEmpleado</td>
+                                <td>
+                                    @if (item.EstadoEntrega == "Pendiente")
+                                    {
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> Pendiente</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success"><i class="bi bi-check-circle"></i> Servido</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Estado == "Pagado")
+                                    {
+                                        <span class="badge bg-primary"><i class="bi bi-credit-card"></i> Pagado</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary"><i class="bi bi-hourglass-split"></i> Pendiente</span>
+                                    }
+                                </td>
+                                <td>@item.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="fw-bold">S/ @item.Total.ToString("N2")</td>
+                                <td class="text-center">
+                                    <a asp-action="Detalle" asp-route-pedidoId="@item.PedidoID" class="btn btn-sm btn-info">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </a>
+                                    <a asp-action="Impresion" asp-route-pedidoId="@item.PedidoID" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-printer"></i> Imprimir
+                                    </a>
+                                </td>
+                            </tr>
+                            num++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center text-muted py-4">
+                                No hay pedidos registrados.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paginación -->
+    @if (totalPaginas > 1)
+    {
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <small class="text-muted">Página @paginaActual de @totalPaginas</small>
+            <nav>
+                <ul class="pagination dp-paginacion mb-0">
+                    <li class="page-item @(paginaActual == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-pagina="@(paginaActual - 1)"
+                           asp-route-mesaId="@mesaIdFiltro"
+                           asp-route-estadoEntrega="@estadoEntregaFiltro"
+                           asp-route-estadoPago="@estadoPagoFiltro"
+                           asp-route-busqueda="@busquedaFiltro">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    @for (int i = 1; i <= totalPaginas; i++)
+                    {
+                        <li class="page-item @(i == paginaActual ? "active" : "")">
+                            <a class="page-link" asp-action="Index"
+                               asp-route-pagina="@i"
+                               asp-route-mesaId="@mesaIdFiltro"
+                               asp-route-estadoEntrega="@estadoEntregaFiltro"
+                               asp-route-estadoPago="@estadoPagoFiltro"
+                               asp-route-busqueda="@busquedaFiltro">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(paginaActual == totalPaginas ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-pagina="@(paginaActual + 1)"
+                           asp-route-mesaId="@mesaIdFiltro"
+                           asp-route-estadoEntrega="@estadoEntregaFiltro"
+                           asp-route-estadoPago="@estadoPagoFiltro"
+                           asp-route-busqueda="@busquedaFiltro">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var mensajeExito = '@TempData["Exito"]';
+            if (mensajeExito) {
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: mensajeExito,
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#28a745'
+                });
+            }
+        });
+    </script>
+}

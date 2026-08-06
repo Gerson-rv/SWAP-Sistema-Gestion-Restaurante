@@ -1,0 +1,141 @@
+@model PRJ_Panaderia.Models.Pago
+
+@{
+    ViewData["Title"] = "Comprobante de Pago";
+    Layout = null;
+    var pedido = ViewBag.Pedido as PRJ_Panaderia.Models.Pedido;
+    var detalles = ViewBag.Detalles as List<PRJ_Panaderia.Models.DetallePedido> ?? new List<PRJ_Panaderia.Models.DetallePedido>();
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Comprobante - Pago #@Model.PagoID</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/pago.css" />
+</head>
+<body>
+    <div class="pg-comprobante-container">
+        <div class="pg-comprobante-card">
+            <div class="pg-comprobante-header">
+                <h2>CHIFA PERCY</h2>
+                <small>"Sabor que une tradicion"</small>
+                <h3 class="mt-2">COMPROBANTE DE PAGO</h3>
+                <h4>Pago #@Model.PagoID</h4>
+            </div>
+
+            <div class="pg-comprobante-info">
+                <div class="row">
+                    <div class="col-6">
+                        <p><strong>Comanda:</strong> C-@Model.PedidoID.ToString("D4")</p>
+                        <p>
+                            <strong>Mesa:</strong>
+                            @if (pedido!.MesaID.HasValue && Model.NumeroMesa > 0)
+                            {
+                                <span>@Model.NumeroMesa</span>
+                            }
+                            else
+                            {
+                                <span>Para llevar</span>
+                            }
+                        </p>
+                        <p><strong>Mozo:</strong> @pedido.NombreEmpleado</p>
+                    </div>
+                    <div class="col-6 text-end">
+                        <p><strong>Fecha:</strong> @Model.Fecha.ToString("dd/MM/yyyy")</p>
+                        <p><strong>Hora:</strong> @Model.Fecha.ToString("HH:mm")</p>
+                        <p><strong>Metodo:</strong> @Model.Metodo</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Productos -->
+            <div class="pg-comprobante-productos">
+                <h5 class="mb-2"><i class="bi bi-bag-check"></i> PRODUCTOS</h5>
+                <table class="table table-sm table-borderless mb-0">
+                    <thead>
+                        <tr>
+                            <th>CANT</th>
+                            <th>PRODUCTO</th>
+                            <th class="text-end">SUBTOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var d in detalles)
+                        {
+                            <tr>
+                                <td>@d.Cantidad</td>
+                                <td>@d.NombreProducto</td>
+                                <td class="text-end">S/ @d.Subtotal.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" class="text-end fw-bold">SUBTOTAL:</td>
+                            <td class="text-end">S/ @pedido!.Subtotal.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="text-end fw-bold">IGV:</td>
+                            <td class="text-end">S/ @pedido.IGV.ToString("N2")</td>
+                        </tr>
+                        <tr class="pg-total-row">
+                            <td colspan="2" class="text-end fw-bold fs-6">TOTAL:</td>
+                            <td class="text-end fw-bold fs-6">S/ @pedido.Total.ToString("N2")</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- Detalle de pago -->
+            <div class="pg-comprobante-pago">
+                @if (Model.Metodo == "Efectivo")
+                {
+                    <div class="row">
+                        <div class="col-4 text-center">
+                            <small class="text-muted d-block">Recibido</small>
+                            <strong>S/ @Model.MontoRecibido?.ToString("N2")</strong>
+                        </div>
+                        <div class="col-4 text-center">
+                            <small class="text-muted d-block">Total</small>
+                            <strong>S/ @Model.Monto.ToString("N2")</strong>
+                        </div>
+                        <div class="col-4 text-center">
+                            <small class="text-muted d-block">Vuelto</small>
+                            <strong class="text-success">S/ @Model.Vuelto?.ToString("N2")</strong>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.Metodo == "Yape")
+                {
+                    <div class="text-center">
+                        <p class="fw-bold mb-2">Total a pagar: S/ @Model.Monto.ToString("N2")</p>
+                        @if (!string.IsNullOrEmpty(Model.QR_Ruta))
+                        {
+                            <img src="@Model.QR_Ruta" class="pg-qr-image mb-2" alt="QR Yape" />
+                            <br />
+                            <small class="text-muted">Escanea el codigo QR con Yape</small>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="pg-comprobante-footer">
+                <p class="mb-0"><strong>Estado:</strong> <span class="badge bg-success">@Model.Estado</span></p>
+            </div>
+        </div>
+
+        <div class="pg-comprobante-botones">
+            <button type="button" class="btn btn-primary btn-lg" onclick="window.print();">
+                <i class="bi bi-printer"></i> IMPRIMIR
+            </button>
+            <a asp-action="Historial" class="btn btn-secondary btn-lg">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+</body>
+</html>

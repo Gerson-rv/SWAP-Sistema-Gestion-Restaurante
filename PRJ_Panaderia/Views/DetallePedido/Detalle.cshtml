@@ -1,0 +1,199 @@
+@model (PRJ_Panaderia.Models.Pedido pedido, List<PRJ_Panaderia.Models.DetallePedido> detalles)
+
+@{
+    ViewData["Title"] = "Detalle del Pedido";
+    var p = Model.pedido;
+    var items = Model.detalles;
+    bool entregado = ViewBag.Entregado ?? false;
+}
+
+<div class="container mt-4 dp-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-receipt"></i> Detalle del Pedido <span class="badge bg-dark dp-comanda-badge">C-@p.PedidoID.ToString("D4")</span></h2>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al Listado
+        </a>
+    </div>
+
+    <!-- Información General -->
+    <div class="card shadow dp-detalle-card mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Información General</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Comanda:</strong> C-@p.PedidoID.ToString("D4")</p>
+                    <p>
+                        <strong>Mesa:</strong>
+                        @if (p.MesaID.HasValue && p.NumeroMesa > 0)
+                        {
+                            <span>@p.NumeroMesa</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Para llevar</span>
+                        }
+                    </p>
+                    <p><strong>Empleado:</strong> @p.NombreEmpleado</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Fecha:</strong> @p.FechaHora.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p><strong>Tipo:</strong> @p.TipoServicio</p>
+                    <p>
+                        <strong>Estado:</strong>
+                        @switch (p.Estado)
+                        {
+                            case "Pendiente":
+                                <span class="badge bg-warning text-dark">Pendiente</span>
+                                break;
+                            case "En Proceso":
+                                <span class="badge bg-info">En Proceso</span>
+                                break;
+                            case "Completado":
+                                <span class="badge bg-success">Completado</span>
+                                break;
+                            case "Anulado":
+                                <span class="badge bg-danger">Anulado</span>
+                                break;
+                            default:
+                                <span class="badge bg-secondary">@p.Estado</span>
+                                break;
+                        }
+                    </p>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(p.NotasEspeciales))
+            {
+                <hr />
+                <p><strong>Notas:</strong> <em>@p.NotasEspeciales</em></p>
+            }
+        </div>
+    </div>
+
+    <!-- Productos -->
+    <div class="card shadow dp-detalle-card mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="bi bi-box-seam"></i> Productos</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>PRODUCTO</th>
+                        <th>PRECIO UNIT.</th>
+                        <th>CANTIDAD</th>
+                        <th>SUBTOTAL</th>
+                        <th class="text-center">ESTADO ENTREGA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (items.Any())
+                    {
+                        @foreach (var item in items)
+                        {
+                            <tr class="@(item.Entregado ? "table-success" : "")">
+                                <td>@item.NombreProducto</td>
+                                <td>S/ @item.PrecioUnitario.ToString("N2")</td>
+                                <td>@item.Cantidad</td>
+                                <td class="fw-bold">S/ @item.Subtotal.ToString("N2")</td>
+                                <td class="text-center">
+                                    @if (item.Entregado)
+                                    {
+                                        <span class="badge bg-success"><i class="bi bi-check-circle"></i> Servido</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> Pendiente</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                No hay productos en este pedido.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="card shadow dp-detalle-card">
+        <div class="card-body text-center">
+            <a asp-action="Impresion" asp-route-pedidoId="@p.PedidoID" class="btn btn-primary btn-lg me-2">
+                <i class="bi bi-printer"></i> Imprimir Comanda
+            </a>
+            @if (!entregado)
+            {
+                <button type="button" class="btn btn-success btn-lg" id="btnMarcarServido" data-pedido="@p.PedidoID">
+                    <i class="bi bi-check-circle"></i> Marcar como Servido
+                </button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-success btn-lg" disabled>
+                    <i class="bi bi-check-circle-fill"></i> Ya fue servido
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var btnMarcar = document.getElementById('btnMarcarServido');
+            if (btnMarcar) {
+                btnMarcar.addEventListener('click', function () {
+                    var pedidoId = this.getAttribute('data-pedido');
+                    Swal.fire({
+                        title: '¿Marcar como servido?',
+                        text: 'Se marcarán todos los productos como entregados.',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#198754',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, marcar',
+                        cancelButtonText: 'Cancelar'
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            Swal.showLoading();
+                            fetch('/DetallePedido/MarcarServido', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: 'pedidoId=' + encodeURIComponent(pedidoId)
+                            })
+                            .then(function (res) { return res.json(); })
+                            .then(function (data) {
+                                Swal.close();
+                                if (data.success) {
+                                    document.querySelectorAll('table tbody tr').forEach(function (row) {
+                                        row.classList.add('table-success');
+                                        var badge = row.querySelector('td:last-child span');
+                                        if (badge) {
+                                            badge.className = 'badge bg-success';
+                                            badge.innerHTML = '<i class="bi bi-check-circle"></i> Servido';
+                                        }
+                                    });
+                                    btnMarcar.disabled = true;
+                                    btnMarcar.innerHTML = '<i class="bi bi-check-circle-fill"></i> Ya fue servido';
+                                    btnMarcar.className = 'btn btn-success btn-lg';
+                                    Swal.fire('¡Servido!', data.message, 'success');
+                                }
+                            })
+                            .catch(function () {
+                                Swal.fire('Error', 'Ocurrió un error al marcar como servido.', 'error');
+                            });
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,84 @@
+@model IEnumerable<PRJ_Panaderia.Models.Cargo>
+
+@{
+    ViewData["Title"] = "Lista de Cargos";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-briefcase"></i> Gestión de Cargos</h2>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="alert alert-info mb-4">
+                <i class="bi bi-info-circle"></i> Los cargos son predefinidos por el sistema. Solo es posible editar el sueldo base de cada cargo.
+            </div>
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Sueldo</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr class="@(item.Activo ? "" : "table-secondary")">
+                                <td>@item.IdCargo</td>
+                                <td>@item.Nombre</td>
+                                <td>S/ @item.Sueldo.ToString("N2")</td>
+                                <td>
+                                    @if (item.Activo)
+                                    {
+                                        <span class="badge bg-success">ACTIVO</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">INACTIVO</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="Edit" asp-route-id="@item.IdCargo" class="btn btn-sm btn-outline-dark" title="Editar sueldo">
+                                        <i class="bi bi-pencil"></i> Sueldo
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                No hay cargos registrados.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var mensajeExito = '@Html.Raw(TempData["Exito"])';
+            if (mensajeExito) {
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: mensajeExito,
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#28a745'
+                });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,251 @@
+@model IEnumerable<PRJ_Panaderia.Models.Auditoria>
+
+@functions {
+    string CodigoFormato(PRJ_Panaderia.Models.Auditoria a)
+    {
+        string tabla = a.Tabla switch
+        {
+            "Pedidos" => "PE",
+            "Pagos" => "PA",
+            "Producto" => "PR",
+            "Empleado" => "EM",
+            "Categoria" => "CA",
+            "Cargo" => "CG",
+            "Cliente" => "CL",
+            "Mesa" => "ME",
+            "TurnosCaja" => "TU",
+            "ConfiguracionSistema" => "CS",
+            "DetallePedido" => "DP",
+            _ => "XX"
+        };
+        string accion = a.Accion switch
+        {
+            "INSERT" => "IN",
+            "UPDATE" => "UP",
+            "DELETE" => "DE",
+            "ANULAR" => "AN",
+            "LOGIN" => "LO",
+            _ => "??"
+        };
+        return $"{tabla}{accion}-{a.AuditoriaID}";
+    }
+}
+
+@{
+    ViewData["Title"] = "Auditoria del Sistema";
+    int paginaActual = ViewBag.PaginaActual ?? 1;
+    int totalPaginas = ViewBag.TotalPaginas ?? 1;
+    int totalRegistros = ViewBag.TotalRegistros ?? 0;
+    var fechaInicio = ViewBag.FechaInicio as string;
+    var fechaFin = ViewBag.FechaFin as string;
+    var tablaFiltro = ViewBag.Tabla as string;
+    var accionFiltro = ViewBag.Accion as string;
+    var empleadoIdFiltro = ViewBag.EmpleadoId as int?;
+    var busquedaFiltro = ViewBag.Busqueda as string;
+    var tablas = ViewBag.Tablas as List<string> ?? new List<string>();
+    var empleados = ViewBag.Empleados as List<PRJ_Panaderia.Models.Empleado> ?? new List<PRJ_Panaderia.Models.Empleado>();
+}
+
+<div class="container mt-4 au-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-journal-text"></i> Auditoria del Sistema</h2>
+        <button type="button" class="btn btn-outline-dark" onclick="abrirReporte()">
+            <i class="bi bi-printer"></i> Imprimir Reporte
+        </button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow au-filtros-card mb-3">
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Desde</label>
+                    <input type="date" name="fechaInicio" class="form-control" value="@fechaInicio" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Hasta</label>
+                    <input type="date" name="fechaFin" class="form-control" value="@fechaFin" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Tabla</label>
+                    <select name="tabla" class="form-select">
+                        <option value="">Todas</option>
+                        @foreach (var t in tablas)
+                        {
+                            <option value="@t" selected="@(tablaFiltro == t)">@t</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Accion</label>
+                    <select name="accion" class="form-select">
+                        <option value="">Todas</option>
+                        <option value="INSERT" selected="@(accionFiltro == "INSERT")">INSERT</option>
+                        <option value="UPDATE" selected="@(accionFiltro == "UPDATE")">UPDATE</option>
+                        <option value="DELETE" selected="@(accionFiltro == "DELETE")">DELETE</option>
+                        <option value="ANULAR" selected="@(accionFiltro == "ANULAR")">ANULAR</option>
+                        <option value="LOGIN" selected="@(accionFiltro == "LOGIN")">LOGIN</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Empleado</label>
+                    <select name="empleadoId" class="form-select">
+                        <option value="">Todos</option>
+                        @foreach (var emp in empleados)
+                        {
+                            <option value="@emp.IdEmpleado" selected="@(empleadoIdFiltro == emp.IdEmpleado)">@emp.NombreCompleto</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-dark">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card shadow au-tabla-card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width:110px;">CODIGO</th>
+                        <th style="width:100px;">TABLA</th>
+                        <th style="width:110px;">REGISTRO</th>
+                        <th style="width:90px;">ACCION</th>
+                        <th>EMPLEADO</th>
+                        <th style="width:100px;">CARGO</th>
+                        <th style="width:140px;">FECHA/HORA</th>
+                        <th>DETALLE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td><strong>@CodigoFormato(item)</strong></td>
+                                <td><span class="badge bg-dark">@item.Tabla</span></td>
+                                <td>@item.RegistroID</td>
+                                <td>
+                                    @switch (item.Accion)
+                                    {
+                                        case "INSERT":
+                                            <span class="badge bg-success">INSERT</span>
+                                            break;
+                                        case "UPDATE":
+                                            <span class="badge bg-warning text-dark">UPDATE</span>
+                                            break;
+                                        case "DELETE":
+                                            <span class="badge bg-danger">DELETE</span>
+                                            break;
+                                        case "ANULAR":
+                                            <span class="badge bg-secondary">ANULAR</span>
+                                            break;
+                                        case "LOGIN":
+                                            <span class="badge bg-info">LOGIN</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-dark">@item.Accion</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>@item.NombreEmpleado</td>
+                                <td>@item.NombreCargo</td>
+                                <td><small>@item.Fecha.ToString("dd/MM/yyyy HH:mm:ss")</small></td>
+                                <td><small>@item.Detalle</small></td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                No hay registros de auditoria.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paginacion + info -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <small class="text-muted">Mostrando registros de @((paginaActual - 1) * 15 + 1) a @(Math.Min(paginaActual * 15, totalRegistros)) de @totalRegistros</small>
+        @if (totalPaginas > 1)
+        {
+            <nav>
+                <ul class="pagination au-paginacion mb-0">
+                    <li class="page-item @(paginaActual == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-pagina="@(paginaActual - 1)"
+                           asp-route-fechaInicio="@fechaInicio"
+                           asp-route-fechaFin="@fechaFin"
+                           asp-route-tabla="@tablaFiltro"
+                           asp-route-accion="@accionFiltro"
+                           asp-route-empleadoId="@empleadoIdFiltro"
+                           asp-route-busqueda="@busquedaFiltro">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    @for (int i = 1; i <= totalPaginas; i++)
+                    {
+                        <li class="page-item @(i == paginaActual ? "active" : "")">
+                            <a class="page-link" asp-action="Index"
+                               asp-route-pagina="@i"
+                               asp-route-fechaInicio="@fechaInicio"
+                               asp-route-fechaFin="@fechaFin"
+                               asp-route-tabla="@tablaFiltro"
+                               asp-route-accion="@accionFiltro"
+                               asp-route-empleadoId="@empleadoIdFiltro"
+                               asp-route-busqueda="@busquedaFiltro">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(paginaActual == totalPaginas ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-pagina="@(paginaActual + 1)"
+                           asp-route-fechaInicio="@fechaInicio"
+                           asp-route-fechaFin="@fechaFin"
+                           asp-route-tabla="@tablaFiltro"
+                           asp-route-accion="@accionFiltro"
+                           asp-route-empleadoId="@empleadoIdFiltro"
+                           asp-route-busqueda="@busquedaFiltro">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function abrirReporte() {
+            var params = new URLSearchParams();
+            var fi = '@fechaInicio';
+            var ff = '@fechaFin';
+            var tb = '@tablaFiltro';
+            var ac = '@accionFiltro';
+            var em = '@empleadoIdFiltro';
+            var bu = '@busquedaFiltro';
+            if (fi) params.set('fechaInicio', fi);
+            if (ff) params.set('fechaFin', ff);
+            if (tb) params.set('tabla', tb);
+            if (ac) params.set('accion', ac);
+            if (em) params.set('empleadoId', em);
+            if (bu) params.set('busqueda', bu);
+            window.open('/Auditoria/Reporte?' + params.toString(), '_blank');
+        }
+    </script>
+}

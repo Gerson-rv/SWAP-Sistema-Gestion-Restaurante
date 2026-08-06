@@ -1,0 +1,451 @@
+@model PRJ_Panaderia.Models.ViewModels.PedidoViewModel
+
+@{
+    ViewData["Title"] = "Separar Pedido";
+    var simbolo = Model.SimboloMoneda;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pedido.css" />
+}
+
+<div class="pos-container">
+    <!-- PANEL IZQUIERDO: Productos -->
+    <div class="productos-panel">
+        <div class="panel-header">
+            <h5><i class="bi bi-bag"></i> Selección de Productos</h5>
+        </div>
+
+        <!-- Config: Mesa + Empleado -->
+        <div class="config-bar">
+            <div>
+                <label>Mesa</label>
+                <select id="ddlMesa" class="form-select form-select-sm">
+                    <option value="0">-- Para llevar --</option>
+                    @foreach (var mesa in Model.MesasDisponibles)
+                    {
+                        <option value="@mesa.IdMesa" data-estado="@mesa.Estado">Mesa @mesa.Numero ●</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label>Empleado</label>
+                <input type="hidden" id="ddlEmpleado" value="@Model.EmpleadoID" />
+                <input type="text" class="form-control form-control-sm"
+                       value="@Model.EmpleadosActivos.FirstOrDefault(e => e.IdEmpleado == Model.EmpleadoID)?.NombreCompleto"
+                       readonly />
+            </div>
+        </div>
+
+        <!-- Categorías -->
+        <div class="categorias-tabs" id="categoriasTabs">
+            <button class="categoria-tab active" data-id="">Todas</button>
+            @foreach (var cat in Model.CategoriasActivas)
+            {
+                <button class="categoria-tab" data-id="@cat.IdCategoria">@cat.Nombre</button>
+            }
+        </div>
+
+        <!-- Grid de productos -->
+        <div class="panel-body">
+            <div class="productos-grid" id="productosGrid">
+                @foreach (var prod in Model.ProductosDisponibles)
+                {
+                    <div class="producto-card">
+                        @if (!string.IsNullOrEmpty(prod.RutaImagen))
+                        {
+                            <img src="@prod.RutaImagen" alt="@prod.Nombre" class="producto-img" />
+                        }
+                        else
+                        {
+                            <div class="producto-img d-flex align-items-center justify-content-center" style="background:#212529;color:#fff;font-size:1.5rem;font-weight:700;">
+                                @prod.Nombre.Substring(0, 1).ToUpper()
+                            </div>
+                        }
+                        <div class="producto-info">
+                            <div class="producto-nombre" title="@prod.Nombre">@prod.Nombre</div>
+                            <div class="producto-precio">@simbolo@prod.Precio.ToString("F2")</div>
+                            <button type="button" class="btn btn-sm btn-dark w-100" onclick="testAgregar(@prod.IdProducto, '@Html.Raw(prod.Nombre.Replace("'", "\\'"))', @prod.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture), '@Html.Raw(prod.RutaImagen ?? "")', @prod.IdCategoria)">
+                                <i class="bi bi-plus-lg"></i> Agregar
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL DERECHO: Carrito -->
+    <div class="carrito-panel">
+        <div class="panel-header">
+            <h5><i class="bi bi-cart3"></i> Carrito</h5>
+        </div>
+
+        <div class="carrito-items" id="carritoItems">
+            <div class="carrito-empty" id="carritoEmpty">
+                <i class="bi bi-cart-x"></i>
+                <p>Sin productos en el carrito</p>
+                <small>Seleccione productos de la izquierda</small>
+            </div>
+        </div>
+
+        <!-- Notas -->
+        <div class="notas-area">
+            <label>NOTAS ESPECIALES:</label>
+            <textarea id="txtNotas" placeholder="Ej: Sin cebolla, poco picante..."></textarea>
+        </div>
+
+        <!-- Totales -->
+        <div class="carrito-totales">
+            <div class="total-row">
+                <span>Subtotal:</span>
+                <span id="lblSubtotal">@simbolo 0.00</span>
+            </div>
+            <div class="total-row">
+                <span>IGV (@Model.IGV_Porcentaje%):</span>
+                <span id="lblIGV">@simbolo 0.00</span>
+            </div>
+            <div class="total-row grand-total">
+                <span>TOTAL:</span>
+                <span id="lblTotal">@simbolo 0.00</span>
+            </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="carrito-acciones">
+            <button class="btn-descartar" onclick="descartarCarrito()">
+                <i class="bi bi-trash"></i> DESCARTAR
+            </button>
+            <button class="btn-finalizar" id="btnFinalizar" onclick="finalizarPedido()" disabled>
+                <i class="bi bi-check-circle"></i> FINALIZAR PEDIDO
+            </button>
+        </div>
+
+        <!-- NUEVO: Botón para imprimir comanda (visible solo después de finalizar) -->
+        <div class="carrito-acciones" id="divImprimirComanda" style="display: none;">
+            <button class="btn-imprimir" id="btnImprimirComanda" onclick="imprimirComanda()" style="width: 100%; background: #0d6efd; color: white; border: none; padding: 0.6rem; border-radius: 8px; font-weight: 600;">
+                <i class="bi bi-printer"></i> IMPRIMIR COMANDA (PDF)
+            </button>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var carritosPorMesa = {};
+        var mesaActual = '0';
+        var notasPorMesa = {};
+        var igvPorcentaje = @Model.IGV_Porcentaje;
+        var moneda = '@Model.Moneda';
+        var simboloMoneda = '@simbolo';
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var ddlMesa = document.getElementById('ddlMesa');
+            for (var i = 0; i < ddlMesa.options.length; i++) {
+                var opt = ddlMesa.options[i];
+                var estado = opt.getAttribute('data-estado');
+                if (estado === 'Libre') {
+                    opt.style.color = '#198754';
+                } else if (estado === 'Ocupada') {
+                    opt.style.color = '#dc3545';
+                }
+            }
+        });
+
+        // Mapa categoría -> ícono y color (Chifa Percy)
+        var iconosCategorias = {
+            1: { icon: 'bi-egg-fried', color: '#fd7e14' },   // Entradas
+            2: { icon: 'bi-cup-hot', color: '#dc3545' },     // Sopas
+            3: { icon: 'bi-cup', color: '#ffc107' },          // Arroces
+            4: { icon: 'bi-cup', color: '#198754' },          // Tallarines
+            5: { icon: 'bi-cup-straw', color: '#0dcaf0' },    // Bebidas
+            6: { icon: 'bi-grid', color: '#6c757d' }          // Bocadillos
+        };
+
+        function getCarrito() {
+            if (mesaActual === null || mesaActual === undefined || mesaActual === '') return [];
+            if (!carritosPorMesa[mesaActual]) {
+                carritosPorMesa[mesaActual] = [];
+            }
+            return carritosPorMesa[mesaActual];
+        }
+
+        function testAgregar(id, nombre, precio, img, categoriaId) {
+            if (mesaActual === null || mesaActual === undefined || mesaActual === '') {
+                Swal.fire('Atención', 'Primero seleccione una mesa.', 'warning');
+                return;
+            }
+            var carrito = getCarrito();
+            var existente = null;
+            for (var i = 0; i < carrito.length; i++) {
+                if (carrito[i].id === id) {
+                    existente = carrito[i];
+                    break;
+                }
+            }
+            if (existente) {
+                existente.cantidad++;
+            } else {
+                carrito.push({ id: id, nombre: nombre, precio: precio, img: img, cantidad: 1, categoriaId: categoriaId });
+            }
+            renderCarrito();
+        }
+
+        function cambiarCantidad(id, delta) {
+            var carrito = getCarrito();
+            for (var i = 0; i < carrito.length; i++) {
+                if (carrito[i].id === id) {
+                    carrito[i].cantidad += delta;
+                    if (carrito[i].cantidad <= 0) {
+                        carrito.splice(i, 1);
+                    }
+                    break;
+                }
+            }
+            renderCarrito();
+        }
+
+        function quitarDelCarrito(id) {
+            var carrito = getCarrito();
+            for (var i = 0; i < carrito.length; i++) {
+                if (carrito[i].id === id) {
+                    carrito.splice(i, 1);
+                    break;
+                }
+            }
+            renderCarrito();
+        }
+
+        document.getElementById('ddlMesa').addEventListener('change', function () {
+            var mesaId = this.value;
+            if (!mesaId || mesaId === '0') {
+                mesaActual = mesaId;
+                var notas = document.getElementById('txtNotas');
+                notas.value = '';
+                renderCarrito();
+                return;
+            }
+            fetch('/Pedido/ValidarMesaActiva?mesaId=' + mesaId)
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.tieneActivo) {
+                        Swal.fire({
+                            title: 'Mesa ocupada',
+                            text: 'Esta mesa ya tiene un pedido activo. Finalice o cancele el pedido anterior primero.',
+                            icon: 'warning',
+                            confirmButtonText: 'Entendido'
+                        }).then(function () {
+                            document.getElementById('ddlMesa').value = '0';
+                            mesaActual = '0';
+                            document.getElementById('txtNotas').value = '';
+                            renderCarrito();
+                        });
+                    } else {
+                        mesaActual = mesaId;
+                        var notas = document.getElementById('txtNotas');
+                        if (notasPorMesa[mesaActual]) {
+                            notas.value = notasPorMesa[mesaActual];
+                        } else {
+                            notas.value = '';
+                        }
+                        renderCarrito();
+                    }
+                })
+                .catch(function () {
+                    mesaActual = mesaId;
+                    renderCarrito();
+                });
+        });
+
+        document.getElementById('txtNotas').addEventListener('input', function () {
+            if (mesaActual) {
+                notasPorMesa[mesaActual] = this.value;
+            }
+        });
+
+        document.querySelectorAll('.categoria-tab').forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                document.querySelectorAll('.categoria-tab').forEach(function (t) { t.classList.remove('active'); });
+                this.classList.add('active');
+                var catId = this.getAttribute('data-id');
+                if (catId) {
+                    fetch('/Pedido/ObtenerProductos?idCategoria=' + catId)
+                        .then(function (res) { return res.json(); })
+                        .then(function (productos) {
+                            var grid = document.getElementById('productosGrid');
+                            grid.innerHTML = '';
+                            productos.forEach(function (p) {
+                                var initial = p.nombre.charAt(0).toUpperCase();
+                                var imgHtml = p.rutaImagen
+                                    ? '<img src="' + p.rutaImagen + '" alt="' + p.nombre + '" class="producto-img" />'
+                                    : '<div class="producto-img d-flex align-items-center justify-content-center" style="background:#212529;color:#fff;font-size:1.5rem;font-weight:700;">' + initial + '</div>';
+                                var nombreSafe = p.nombre.replace(/'/g, "\\'");
+                                grid.innerHTML += '<div class="producto-card">' + imgHtml +
+                                    '<div class="producto-info">' +
+                                    '<div class="producto-nombre">' + p.nombre + '</div>' +
+                                    '<div class="producto-precio">' + simboloMoneda + p.precio.toFixed(2) + '</div>' +
+                                    '<button type="button" class="btn btn-sm btn-dark w-100" onclick="testAgregar(' + p.idProducto + ',\'' + nombreSafe + '\',' + p.precio + ',\'' + (p.rutaImagen || '') + '\',' + p.idCategoria + ')">' +
+                                    '<i class="bi bi-plus-lg"></i> Agregar</button></div></div>';
+                            });
+                        });
+                } else {
+                    location.reload();
+                }
+            });
+        });
+
+        function renderCarrito() {
+            var container = document.getElementById('carritoItems');
+            var btnFinalizar = document.getElementById('btnFinalizar');
+            var carrito = getCarrito();
+
+            if (carrito.length === 0) {
+                container.innerHTML = '<div class="carrito-empty"><i class="bi bi-cart-x"></i><p>Sin productos en el carrito</p><small>' +
+                    (mesaActual ? 'Agregue productos para esta mesa' : 'Seleccione una mesa primero') + '</small></div>';
+                btnFinalizar.disabled = true;
+            } else {
+                var html = '';
+                for (var i = 0; i < carrito.length; i++) {
+                    var item = carrito[i];
+                    var subtotal = item.precio * item.cantidad;
+                    var cat = iconosCategorias[item.categoriaId] || iconosCategorias[6];
+                    var iconHtml = '<div class="carrito-item-icono" style="background:' + cat.color + '20;color:' + cat.color + ';"><i class="bi ' + cat.icon + '"></i></div>';
+                    html += '<div class="carrito-item">' + iconHtml +
+                        '<div class="carrito-item-info"><h6>' + item.nombre + '</h6>' +
+                        '<div class="carrito-item-controls">' +
+                        '<button class="btn-cantidad" onclick="cambiarCantidad(' + item.id + ',-1)">-</button>' +
+                        '<span class="cantidad-display">' + item.cantidad + '</span>' +
+                        '<button class="btn-cantidad" onclick="cambiarCantidad(' + item.id + ',1)">+</button>' +
+                        '<button class="btn-quitar" onclick="quitarDelCarrito(' + item.id + ')"><i class="bi bi-trash"></i></button>' +
+                        '</div></div>' +
+                        '<div class="carrito-item-precio">' +
+                        '<div class="precio-unitario">' + simboloMoneda + item.precio.toFixed(2) + '</div>' +
+                        '<div class="precio-subtotal">' + simboloMoneda + subtotal.toFixed(2) + '</div>' +
+                        '</div></div>';
+                }
+                container.innerHTML = html;
+                btnFinalizar.disabled = false;
+            }
+
+            var subtotal = 0;
+            for (var j = 0; j < carrito.length; j++) {
+                subtotal += carrito[j].precio * carrito[j].cantidad;
+            }
+            var factor = 1 + (igvPorcentaje / 100);
+            var total = subtotal;
+            var subSinIgv = Math.round(total / factor * 100) / 100;
+            var igv = Math.round((total - subSinIgv) * 100) / 100;
+
+            document.getElementById('lblSubtotal').textContent = simboloMoneda + subSinIgv.toFixed(2);
+            document.getElementById('lblIGV').textContent = simboloMoneda + igv.toFixed(2);
+            document.getElementById('lblTotal').textContent = simboloMoneda + total.toFixed(2);
+        }
+
+        function descartarCarrito() {
+            var carrito = getCarrito();
+            if (carrito.length === 0) {
+                Swal.fire('Info', 'No hay productos en el carrito para descartar.', 'info');
+                return;
+            }
+            Swal.fire({
+                title: '¿Descartar pedido?',
+                text: 'Se eliminarán todos los productos de esta mesa.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, descartar',
+                cancelButtonText: 'Cancelar'
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    carritosPorMesa[mesaActual] = [];
+                    notasPorMesa[mesaActual] = '';
+                    document.getElementById('txtNotas').value = '';
+                    renderCarrito();
+                    Swal.fire('Descartado', 'El carrito ha sido vaciado.', 'success');
+                }
+            });
+        }
+
+        function finalizarPedido() {
+            var carrito = getCarrito();
+            if (carrito.length === 0) {
+                Swal.fire('Info', 'Agregue productos antes de finalizar.', 'info');
+                return;
+            }
+            var empleadoId = parseInt(document.getElementById('ddlEmpleado').value);
+            var mesaId = document.getElementById('ddlMesa').value;
+            var tipoServicio = mesaId === '0' ? 'ParaLlevar' : 'Mesa';
+            var notas = document.getElementById('txtNotas').value;
+
+            if (mesaId === null || mesaId === undefined || mesaId === '') { Swal.fire('Error', 'Seleccione una mesa.', 'error'); return; }
+            if (!empleadoId) { Swal.fire('Error', 'Seleccione un empleado.', 'error'); return; }
+
+            var items = [];
+            for (var i = 0; i < carrito.length; i++) {
+                items.push({ ProductoID: carrito[i].id, Cantidad: carrito[i].cantidad, PrecioUnitario: carrito[i].precio });
+            }
+
+            var turnoAbiertoId = @(Model.TurnoAbiertoID ?? 0);
+            if (!turnoAbiertoId) {
+                Swal.fire('Sin turno', 'No hay turno de caja abierto. Abra un turno primero.', 'warning');
+                return;
+            }
+
+            var request = {
+                TurnoID: turnoAbiertoId, EmpleadoID: empleadoId, MesaID: mesaId === '0' ? null : parseInt(mesaId),
+                TipoServicio: tipoServicio, NotasEspeciales: notas || null, Items: items
+            };
+
+            var totalCarrito = 0;
+            for (var j = 0; j < carrito.length; j++) { totalCarrito += carrito[j].precio * carrito[j].cantidad; }
+            var factor = 1 + (igvPorcentaje / 100);
+            var totalFinal = totalCarrito;
+            var subSinIgv = Math.round(totalFinal / factor * 100) / 100;
+            var igvCalculado = Math.round((totalFinal - subSinIgv) * 100) / 100;
+
+            Swal.fire({
+                title: '¿Finalizar pedido?',
+                html: '<p>Se registrará el pedido con <strong>' + carrito.length + '</strong> producto(s).</p><p><strong>Total: ' + simboloMoneda + totalFinal.toFixed(2) + '</strong></p>',
+                icon: 'question', showCancelButton: true,
+                confirmButtonColor: '#198754', cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, finalizar', cancelButtonText: 'Cancelar'
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    fetch('/Pedido/CrearPedido', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(request)
+                    }).then(function (res) { return res.json(); }).then(function (data) {
+                        if (data.success) {
+                            carritosPorMesa[mesaActual] = [];
+                            notasPorMesa[mesaActual] = '';
+                            document.getElementById('txtNotas').value = '';
+                            Swal.fire({
+                                title: '¡Pedido creado!',
+                                html: data.message,
+                                icon: 'success', showConfirmButton: true, confirmButtonText: 'OK', confirmButtonColor: '#28a745'
+                            }).then(function () { location.reload(); });
+                        } else { Swal.fire('Error', data.message, 'error'); }
+                    }).catch(function () { Swal.fire('Error', 'Ocurrió un error al crear el pedido.', 'error'); });
+                }
+            });
+        }
+
+        function verDetallePedido(pedidoId) {
+            fetch('/Pedido/ObtenerDetallePedido?id=' + pedidoId).then(function (res) { return res.json(); }).then(function (data) {
+                if (data.success) {
+                    var html = '<div class="text-start"><p><strong>Empleado:</strong> ' + data.pedido.nombreEmpleado + '</p>' +
+                        '<p><strong>Estado:</strong> <span class="badge bg-warning text-dark">' + data.pedido.estado + '</span></p><hr>' +
+                        '<table class="table table-sm"><thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr></thead><tbody>';
+                    for (var i = 0; i < data.detalles.length; i++) {
+                        var d = data.detalles[i];
+                        html += '<tr><td>' + d.nombreProducto + '</td><td>' + d.cantidad + '</td><td>' + simboloMoneda + d.precioUnitario.toFixed(2) + '</td><td>' + simboloMoneda + d.subtotal.toFixed(2) + '</td></tr>';
+                    }
+                    html += '</tbody></table><div class="text-end"><strong>Total: ' + simboloMoneda + data.pedido.total.toFixed(2) + '</strong></div></div>';
+                    Swal.fire({ title: 'Detalle del Pedido', html: html, width: 600, confirmButtonText: 'Cerrar', confirmButtonColor: '#6c757d' });
+                }
+            });
+        }
+    </script>
+}

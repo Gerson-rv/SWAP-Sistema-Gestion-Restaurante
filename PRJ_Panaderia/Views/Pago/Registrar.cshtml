@@ -1,0 +1,333 @@
+@model PRJ_Panaderia.Models.Pago
+
+@{
+    ViewData["Title"] = "Registrar Pago";
+    var pedido = ViewBag.Pedido as PRJ_Panaderia.Models.Pedido;
+    var detalles = ViewBag.Detalles as List<PRJ_Panaderia.Models.DetallePedido> ?? new List<PRJ_Panaderia.Models.DetallePedido>();
+    var numeroYape = ViewBag.NumeroYape as string;
+}
+
+<div class="container mt-4 pg-container">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0"><i class="bi bi-credit-card"></i> PAGAR PEDIDO - C-@pedido!.PedidoID.ToString("D4")</h2>
+        <a asp-action="Listado" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Cancelar
+        </a>
+    </div>
+
+    <!-- Info del Pedido -->
+    <div class="card shadow mb-3">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="bi bi-info-circle"></i> INFORMACION DEL PEDIDO</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <strong>Mesa:</strong>
+                    @(pedido.MesaID.HasValue && pedido.NumeroMesa > 0 ? $"Mesa {pedido.NumeroMesa}" : "Para llevar")
+                </div>
+                <div class="col-md-4">
+                    <strong>Mozo:</strong> @pedido.NombreEmpleado
+                </div>
+                <div class="col-md-4">
+                    <strong>Fecha:</strong> @pedido.FechaHora.ToString("dd/MM/yyyy HH:mm")
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="bi bi-bag-check"></i> PRODUCTOS</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>CANT</th>
+                        <th>PRODUCTO</th>
+                        <th class="text-end">PRECIO U.</th>
+                        <th class="text-end">SUBTOTAL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var d in detalles)
+                    {
+                        <tr>
+                            <td>@d.Cantidad</td>
+                            <td>
+                                @d.NombreProducto
+                                @if (!string.IsNullOrEmpty(d.Modificadores))
+                                {
+                                    <br /><small class="text-muted">(@d.Modificadores)</small>
+                                }
+                            </td>
+                            <td class="text-end">S/ @d.PrecioUnitario.ToString("N2")</td>
+                            <td class="text-end fw-bold">S/ @d.Subtotal.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="table-light">
+                        <td colspan="3" class="text-end fw-bold">SUBTOTAL:</td>
+                        <td class="text-end">S/ @pedido.Subtotal.ToString("N2")</td>
+                    </tr>
+                    <tr class="table-light">
+                        <td colspan="3" class="text-end fw-bold">IGV (18%):</td>
+                        <td class="text-end">S/ @pedido.IGV.ToString("N2")</td>
+                    </tr>
+                    <tr class="table-dark">
+                        <td colspan="3" class="text-end text-white fw-bold">TOTAL:</td>
+                        <td class="text-end text-white fw-bold fs-5">S/ @pedido.Total.ToString("N2")</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Formulario de pago -->
+    <form asp-action="Registrar" method="post" id="formPago">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <input type="hidden" asp-for="PedidoID" />
+        <input type="hidden" asp-for="Monto" value="@pedido.Total" />
+        <input type="hidden" asp-for="QR_Bytes" id="qrBytesHidden" />
+
+        <!-- Metodos de pago -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-wallet2"></i> METODO DE PAGO</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex gap-3 justify-content-center">
+                    <button type="button" class="btn btn-lg btn-outline-success pg-metodo-btn active" id="btnEfectivo" onclick="seleccionarMetodo('Efectivo')">
+                        <i class="bi bi-cash-stack"></i> EFECTIVO
+                    </button>
+                    <button type="button" class="btn btn-lg btn-outline-primary pg-metodo-btn" id="btnYape" onclick="seleccionarMetodo('Yape')">
+                        <i class="bi bi-phone"></i> YAPE
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <input type="hidden" asp-for="Metodo" id="metodoPagoHidden" value="Efectivo" />
+
+        <!-- Seccion Efectivo -->
+        <div id="seccionEfectivo" class="pg-seccion-pago">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-cash-stack"></i> PAGO EN EFECTIVO</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Monto recibido:</label>
+                            <input type="number" asp-for="MontoRecibido" class="form-control form-control-lg"
+                                   id="montoRecibido" step="0.01" min="@pedido.Total" placeholder="0.00"
+                                   oninput="calcularVuelto()" />
+                            <span asp-validation-for="MontoRecibido" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Vuelto:</label>
+                            <input type="text" class="form-control form-control-lg" id="vueltoDisplay"
+                                   value="S/ 0.00" readonly />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seccion Yape -->
+        <div id="seccionYape" class="pg-seccion-pago" style="display: none;">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-phone"></i> PAGO CON YAPE</h5>
+                </div>
+                <div class="card-body text-center">
+                    <p class="mb-2"><strong>Telefono Yape Empresa:</strong> @(numeroYape ?? "No configurado")</p>
+                    <div class="pg-yape-total mb-3">
+                        <small class="text-muted">Total a pagar</small>
+                        <h3 class="fw-bold text-primary mb-0">S/ @pedido!.Total.ToString("N2")</h3>
+                    </div>
+                    <div id="qrContainer" class="mb-3">
+                        <div class="pg-qr-placeholder">
+                            <i class="bi bi-qr-code" style="font-size: 3rem;"></i>
+                            <p class="mt-2">Cargando codigo QR...</p>
+                        </div>
+                    </div>
+                    <small class="text-muted">Escanea el codigo QR con tu aplicacion Yape</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="d-flex justify-content-between mt-4">
+            <a asp-action="Listado" class="btn btn-secondary btn-lg">
+                <i class="bi bi-arrow-left"></i> CANCELAR
+            </a>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-lg btn-secondary" id="btnImprimir" disabled
+                        style="background:#ffc107;border-color:#ffc107;color:#212529;font-weight:600;">
+                    <i class="bi bi-printer"></i> IMPRIMIR
+                </button>
+                <button type="button" class="btn btn-success btn-lg" id="btnConfirmar">
+                    <i class="bi bi-check-circle"></i> CONFIRMAR PAGO
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        var montoTotal = @pedido.Total;
+        var qrGenerado = false;
+        var pedidoId = @pedido.PedidoID;
+
+        function seleccionarMetodo(metodo) {
+            document.getElementById('metodoPagoHidden').value = metodo;
+            document.getElementById('btnEfectivo').classList.remove('active');
+            document.getElementById('btnYape').classList.remove('active');
+
+            if (metodo === 'Efectivo') {
+                document.getElementById('btnEfectivo').classList.add('active');
+                document.getElementById('seccionEfectivo').style.display = 'block';
+                document.getElementById('seccionYape').style.display = 'none';
+            } else {
+                document.getElementById('btnYape').classList.add('active');
+                document.getElementById('seccionEfectivo').style.display = 'none';
+                document.getElementById('seccionYape').style.display = 'block';
+                if (!qrGenerado) generarQR();
+            }
+        }
+
+        function calcularVuelto() {
+            var recibido = parseFloat(document.getElementById('montoRecibido').value) || 0;
+            var vuelto = recibido - montoTotal;
+            document.getElementById('vueltoDisplay').value = 'S/ ' + Math.max(0, vuelto).toFixed(2);
+        }
+
+        function generarQR() {
+            fetch('/Pago/GenerarQR', { method: 'POST' })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        var container = document.getElementById('qrContainer');
+                        container.innerHTML = '<img src="data:image/png;base64,' + data.qr + '" class="pg-qr-image" alt="QR Yape" />';
+                        document.getElementById('qrBytesHidden').value = data.qr;
+                        qrGenerado = true;
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                });
+        }
+
+        document.getElementById('btnConfirmar').addEventListener('click', function () {
+            var metodo = document.getElementById('metodoPagoHidden').value;
+
+            if (metodo === 'Efectivo') {
+                var recibido = parseFloat(document.getElementById('montoRecibido').value) || 0;
+                if (recibido < montoTotal) {
+                    Swal.fire('Error', 'El monto recibido debe ser mayor o igual al total.', 'error');
+                    return;
+                }
+            }
+            if (metodo === 'Yape' && !qrGenerado) {
+                Swal.fire('Error', 'Debe generar el codigo QR primero.', 'error');
+                return;
+            }
+
+            var body = 'PedidoID=' + pedidoId +
+                       '&Monto=' + montoTotal +
+                       '&Metodo=' + metodo;
+
+            if (metodo === 'Yape') {
+                body += '&QR_Bytes=' + encodeURIComponent(document.getElementById('qrBytesHidden').value || '');
+            }
+
+            if (metodo === 'Efectivo') {
+                var montoRecibido = parseFloat(document.getElementById('montoRecibido').value) || 0;
+                body += '&MontoRecibido=' + montoRecibido;
+            }
+
+            Swal.fire({
+                title: 'Confirmar pago?',
+                html: '<p>Total: <strong>S/ ' + montoTotal.toFixed(2) + '</strong></p>',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Si, confirmar',
+                cancelButtonText: 'Cancelar'
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    Swal.showLoading();
+                    fetch('/Pago/RegistrarAjax', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: body
+                    })
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        Swal.close();
+                        if (data.success) {
+                            document.getElementById('btnConfirmar').disabled = true;
+                            document.getElementById('btnConfirmar').innerHTML = '<i class="bi bi-check-circle"></i> PAGO CONFIRMADO';
+
+                            var btnImp = document.getElementById('btnImprimir');
+                            btnImp.disabled = false;
+                            btnImp.style.background = '#ffc107';
+                            btnImp.style.borderColor = '#ffc107';
+                            btnImp.style.color = '#212529';
+                            btnImp.style.fontWeight = '600';
+                            btnImp.style.cursor = 'pointer';
+                            btnImp.onclick = function () {
+                                window.open('/Pago/Comprobante?pagoId=' + data.pagoId, '_blank');
+                            };
+
+                            var titulo = 'Pago registrado!';
+                            var icono = 'success';
+                            var htmlMsg = '<p>' + data.message + '</p>';
+
+                            if (metodo === 'Yape') {
+                                if (data.emailSent) {
+                                    htmlMsg += '<hr><p style="color:#198754;font-weight:bold;">&#10004; Correo enviado a: ' + data.emailTo + '</p>';
+                                } else {
+                                    htmlMsg += '<hr><p style="color:#dc3545;">&#9888; No se pudo enviar el correo: ' + data.emailMessage + '</p>';
+                                }
+                            }
+
+                            Swal.fire({
+                                title: titulo,
+                                html: htmlMsg,
+                                icon: icono,
+                                showDenyButton: metodo === 'Yape',
+                                showCancelButton: true,
+                                confirmButtonText: 'OK',
+                                denyButtonText: 'Ver Historial',
+                                cancelButtonText: 'Cerrar',
+                                confirmButtonColor: '#28a745',
+                                denyButtonColor: '#0d6efd'
+                            }).then(function (result) {
+                                if (result.isConfirmed || result.isDismissed) {
+                                    window.location.href = '/Pago/Listado';
+                                } else if (result.isDenied) {
+                                    window.location.href = '/Pago/Historial';
+                                }
+                            });
+                        } else {
+                            Swal.fire('Error', data.message, 'error');
+                        }
+                    })
+                    .catch(function (err) {
+                        Swal.close();
+                        Swal.fire('Error', 'Ocurrio un error al registrar el pago: ' + err.message, 'error');
+                    });
+                }
+            });
+        });
+    </script>
+}

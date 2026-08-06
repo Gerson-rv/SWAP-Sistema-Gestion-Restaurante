@@ -1,0 +1,311 @@
+@model IEnumerable<PRJ_Panaderia.Models.Pago>
+
+@{
+    ViewData["Title"] = "Historial de Pagos";
+    int paginaActual = ViewBag.PaginaActual ?? 1;
+    int totalPaginas = ViewBag.TotalPaginas ?? 1;
+    var fechaInicio = ViewBag.FechaInicio as string;
+    var fechaFin = ViewBag.FechaFin as string;
+    var metodoFiltro = ViewBag.Metodo as string;
+    var busquedaFiltro = ViewBag.Busqueda as string;
+}
+
+<div class="container mt-4 pg-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-journal-text"></i> Historial de Pagos</h2>
+        <a asp-action="Listado" class="btn btn-primary">
+            <i class="bi bi-cash-coin"></i> Ir a Pagos
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow pg-filtros-card">
+        <div class="card-body">
+            <form method="get" asp-action="Historial" class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Desde</label>
+                    <input type="date" name="fechaInicio" class="form-control" value="@fechaInicio" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Hasta</label>
+                    <input type="date" name="fechaFin" class="form-control" value="@fechaFin" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Metodo</label>
+                    <select name="metodo" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="Efectivo" selected="@(metodoFiltro == "Efectivo")">Efectivo</option>
+                        <option value="Yape" selected="@(metodoFiltro == "Yape")">Yape</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Buscar</label>
+                    <input type="text" name="busqueda" class="form-control" placeholder="#Pedido, Mesa..."
+                           value="@busquedaFiltro" />
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-dark">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                    <a asp-action="Historial" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card shadow pg-tabla-card mt-3">
+        <div class="card-body">
+            <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>COMANDA</th>
+                        <th>MESA</th>
+                        <th>METODO</th>
+                        <th>MONTO</th>
+                        <th>ESTADO</th>
+                        <th class="text-center" style="width: 200px;">ACCION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr class="@(item.Estado == "Anulado" ? "table-secondary" : "")">
+                                <td><span class="badge bg-dark pg-comanda-badge">C-@item.PedidoID.ToString("D4")</span></td>
+                                <td>
+                                    @if (item.NumeroMesa > 0)
+                                    {
+                                        <span>Mesa @item.NumeroMesa</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Para llevar</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Metodo == "Yape")
+                                    {
+                                        <span class="badge" style="background:#7c3aed;"><i class="bi bi-phone"></i> Yape</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success"><i class="bi bi-cash"></i> Efectivo</span>
+                                    }
+                                </td>
+                                <td class="fw-bold">S/ @item.Monto.ToString("N2")</td>
+                                <td>
+                                    @if (item.Estado == "Confirmado")
+                                    {
+                                        <span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Confirmado</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger"><i class="bi bi-x-circle-fill"></i> Anulado</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Estado == "Confirmado")
+                                    {
+                                        <button type="button" class="btn btn-sm btn-danger btn-anular"
+                                                data-id="@item.PagoID" data-comanda="C-@item.PedidoID.ToString("D4")">
+                                            <i class="bi bi-x-circle"></i> ANUL..
+                                        </button>
+                                    }
+                                    <a asp-action="Comprobante" asp-route-pagoId="@item.PagoID"
+                                       target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-printer"></i> IMP..
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-info btn-ver"
+                                            data-id="@item.PagoID" data-comanda="C-@item.PedidoID.ToString("D4")"
+                                            data-pedido-id="@item.PedidoID"
+                                            data-metodo="@item.Metodo" data-monto="@item.Monto.ToString("N2")"
+                                            data-estado="@item.Estado"
+                                            data-mesa="@(item.NumeroMesa > 0 ? $"Mesa {item.NumeroMesa}" : "Para llevar")"
+                                            data-fecha="@item.Fecha.ToString("dd/MM/yyyy HH:mm")"
+                                            data-vuelto="@(item.Vuelto?.ToString("N2") ?? "-")">
+                                        <i class="bi bi-eye"></i> VER
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                No hay pagos registrados.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paginacion -->
+    @if (totalPaginas > 1)
+    {
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <small class="text-muted">Pagina @paginaActual de @totalPaginas</small>
+            <nav>
+                <ul class="pagination pg-paginacion mb-0">
+                    <li class="page-item @(paginaActual == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-action="Historial"
+                           asp-route-pagina="@(paginaActual - 1)"
+                           asp-route-fechaInicio="@fechaInicio"
+                           asp-route-fechaFin="@fechaFin"
+                           asp-route-metodo="@metodoFiltro"
+                           asp-route-busqueda="@busquedaFiltro">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    @for (int i = 1; i <= totalPaginas; i++)
+                    {
+                        <li class="page-item @(i == paginaActual ? "active" : "")">
+                            <a class="page-link" asp-action="Historial"
+                               asp-route-pagina="@i"
+                               asp-route-fechaInicio="@fechaInicio"
+                               asp-route-fechaFin="@fechaFin"
+                               asp-route-metodo="@metodoFiltro"
+                               asp-route-busqueda="@busquedaFiltro">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(paginaActual == totalPaginas ? "disabled" : "")">
+                        <a class="page-link" asp-action="Historial"
+                           asp-route-pagina="@(paginaActual + 1)"
+                           asp-route-fechaInicio="@fechaInicio"
+                           asp-route-fechaFin="@fechaFin"
+                           asp-route-metodo="@metodoFiltro"
+                           asp-route-busqueda="@busquedaFiltro">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        .badge-confirmed { background-color: #198754; color: #fff; }
+        .badge-cancelled { background-color: #dc3545; color: #fff; }
+        .badge-yape { background-color: #7c3aed; color: #fff; }
+        .badge-efectivo { background-color: #198754; color: #fff; }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.btn-anular').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+                    var comanda = this.getAttribute('data-comanda');
+
+                    Swal.fire({
+                        title: 'Anular pago?',
+                        text: "Se anulara el pago del " + comanda + " y el pedido volver a Pendiente.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Si, anular',
+                        cancelButtonText: 'Cancelar'
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            fetch('/Pago/Anular', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: 'pagoId=' + encodeURIComponent(id)
+                            })
+                            .then(function (res) { return res.json(); })
+                            .then(function (data) {
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: 'Anulado!',
+                                        text: data.message,
+                                        icon: 'success',
+                                        confirmButtonText: 'OK',
+                                        confirmButtonColor: '#28a745'
+                                    }).then(function () {
+                                        window.location.reload();
+                                    });
+                                }
+                            })
+                            .catch(function () {
+                                Swal.fire('Error', 'Ocurrio un error al anular.', 'error');
+                            });
+                        }
+                    });
+                });
+            });
+
+            document.querySelectorAll('.btn-ver').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var comanda = this.getAttribute('data-comanda');
+                    var metodo = this.getAttribute('data-metodo');
+                    var monto = this.getAttribute('data-monto');
+                    var estado = this.getAttribute('data-estado');
+                    var mesa = this.getAttribute('data-mesa');
+                    var fecha = this.getAttribute('data-fecha');
+                    var vuelto = this.getAttribute('data-vuelto');
+                    var pedidoId = this.getAttribute('data-pedido-id');
+
+                    fetch('/Pedido/ObtenerDetallePedido?id=' + pedidoId)
+                        .then(function (res) { return res.json(); })
+                        .then(function (data) {
+                            var html = '<div class="text-start">' +
+                                '<p><strong>Comanda:</strong> ' + comanda + '</p>' +
+                                '<p><strong>Mesa:</strong> ' + mesa + '</p>' +
+                                '<p><strong>Fecha:</strong> ' + fecha + '</p>' +
+                                '<p><strong>Metodo:</strong> ' + metodo + '</p>';
+
+                            if (data.success && data.detalles && data.detalles.length > 0) {
+                                html += '<hr><p class="fw-bold mb-1">PRODUCTOS:</p>' +
+                                    '<table class="table table-sm table-borderless mb-2" style="font-size:0.85rem;">' +
+                                    '<thead><tr><th>CANT</th><th>PRODUCTO</th><th class="text-end">SUBTOTAL</th></tr></thead><tbody>';
+                                for (var i = 0; i < data.detalles.length; i++) {
+                                    var d = data.detalles[i];
+                                    html += '<tr><td>' + d.cantidad + '</td><td>' + d.nombreProducto + '</td>' +
+                                        '<td class="text-end">S/ ' + d.subtotal.toFixed(2) + '</td></tr>';
+                                }
+                                html += '</tbody></table>';
+                            }
+
+                            html += '<hr>' +
+                                '<p><strong>Monto:</strong> S/ ' + monto + '</p>';
+
+                            if (metodo === 'Efectivo') {
+                                var montoNum = parseFloat(monto.replace(',', '')) || 0;
+                                var vueltoNum = parseFloat(vuelto.replace(',', '')) || 0;
+                                var recibido = montoNum + vueltoNum;
+                                html += '<p><strong>Monto Recibido:</strong> S/ ' + recibido.toFixed(2) + '</p>';
+                                html += '<p><strong>Vuelto:</strong> S/ ' + vuelto + '</p>';
+                            }
+
+                            html += '<p><strong>Estado:</strong> <span class="badge bg-' + (estado === 'Confirmado' ? 'success' : 'danger') + '">' + estado + '</span></p>' +
+                                '</div>';
+
+                            Swal.fire({
+                                title: 'Detalle del Pago',
+                                html: html,
+                                width: 550,
+                                confirmButtonText: 'Cerrar',
+                                confirmButtonColor: '#6c757d'
+                            });
+                        })
+                        .catch(function () {
+                            Swal.fire('Error', 'No se pudieron cargar los productos.', 'error');
+                        });
+                });
+            });
+        });
+    </script>
+}

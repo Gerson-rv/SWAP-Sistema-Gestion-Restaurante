@@ -1,0 +1,111 @@
+@model IEnumerable<PRJ_Panaderia.Models.Auditoria>
+
+@functions {
+    string CodigoFormato(PRJ_Panaderia.Models.Auditoria a)
+    {
+        string tabla = a.Tabla switch
+        {
+            "Pedidos" => "PE",
+            "Pagos" => "PA",
+            "Producto" => "PR",
+            "Empleado" => "EM",
+            "Categoria" => "CA",
+            "Cargo" => "CG",
+            "Cliente" => "CL",
+            "Mesa" => "ME",
+            "TurnosCaja" => "TU",
+            "ConfiguracionSistema" => "CS",
+            "DetallePedido" => "DP",
+            _ => "XX"
+        };
+        string accion = a.Accion switch
+        {
+            "INSERT" => "IN",
+            "UPDATE" => "UP",
+            "DELETE" => "DE",
+            "ANULAR" => "AN",
+            "LOGIN" => "LO",
+            _ => "??"
+        };
+        return $"{tabla}{accion}-{a.AuditoriaID}";
+    }
+}
+
+@{
+    ViewData["Title"] = "Reporte de Auditoria";
+    Layout = null;
+    var fechaInicio = ViewBag.FechaInicio as string;
+    var fechaFin = ViewBag.FechaFin as string;
+    var tabla = ViewBag.Tabla as string;
+    var accion = ViewBag.Accion as string;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reporte de Auditoria</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/auditoria.css" />
+</head>
+<body>
+    <div class="au-rep-container">
+        <div class="au-rep-header">
+            <h2>REPORTE DE AUDITORIA DEL SISTEMA</h2>
+            <small>Chifa Percy - Sistema de Gestion</small>
+        </div>
+
+        <div class="au-rep-filtros">
+            <strong>Filtros aplicados:</strong>
+            Desde: @(fechaInicio ?? "N/A") | Hasta: @(fechaFin ?? "N/A") |
+            Tabla: @(tabla ?? "Todas") | Accion: @(accion ?? "Todas")
+            <br />
+            <small>Fecha de impresion: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</small>
+        </div>
+
+        <table class="table table-bordered table-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>CODIGO</th>
+                    <th>Tabla</th>
+                    <th>Registro</th>
+                    <th>Accion</th>
+                    <th>Empleado</th>
+                    <th>Cargo</th>
+                    <th>Fecha/Hora</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@CodigoFormato(item)</td>
+                        <td>@item.Tabla</td>
+                        <td>@item.RegistroID</td>
+                        <td>@item.Accion</td>
+                        <td>@item.NombreEmpleado</td>
+                        <td>@item.NombreCargo</td>
+                        <td>@item.Fecha.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                        <td>@item.Detalle</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="au-rep-footer">
+            <strong>CHIFA PERCY</strong> - Reporte generado automaticamente
+        </div>
+
+        <div class="au-rep-botones">
+            <button type="button" class="btn btn-primary btn-lg" onclick="window.print();">
+                <i class="bi bi-printer"></i> IMPRIMIR
+            </button>
+            <button type="button" class="btn btn-secondary btn-lg" onclick="window.close();">
+                <i class="bi bi-x-circle"></i> CERRAR
+            </button>
+        </div>
+    </div>
+</body>
+</html>

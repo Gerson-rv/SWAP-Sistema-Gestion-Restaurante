@@ -1,0 +1,56 @@
+@model PRJ_Panaderia.Models.Mesa
+
+@{
+    ViewData["Title"] = "Crear Mesa";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Crear Nueva Mesa</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Numero" class="form-label"></label>
+                            <input asp-for="Numero" class="form-control" placeholder="Ingrese el número de mesa" />
+                            <span asp-validation-for="Numero" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Estado" class="form-label"></label>
+                            <select asp-for="Estado" class="form-select">
+                                <option value="Libre">Libre</option>
+                                <option value="Ocupada">Ocupada</option>
+                                <option value="Reservada">Reservada</option>
+                            </select>
+                            <span asp-validation-for="Estado" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3 form-check form-switch">
+                            <input asp-for="Activo" class="form-check-input" role="switch" id="chkActivo" checked />
+                            <label asp-for="Activo" class="form-check-label" for="chkActivo"></label>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg"></i> Guardar
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

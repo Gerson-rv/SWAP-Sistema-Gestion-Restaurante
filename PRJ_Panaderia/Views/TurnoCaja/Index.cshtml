@@ -1,0 +1,464 @@
+@model IEnumerable<PRJ_Panaderia.Models.TurnoCaja>
+
+@{
+    ViewData["Title"] = "Turnos de Caja";
+    var turnoAbierto = ViewBag.TurnoAbierto as PRJ_Panaderia.Models.TurnoCaja;
+    var soloAbiertos = ViewBag.SoloAbiertos as bool?;
+    var fechaInicio = ViewBag.FechaInicio as string;
+    var fechaFin = ViewBag.FechaFin as string;
+}
+
+<div class="container-fluid p-4">
+
+    <!-- ============================================= -->
+    <!-- BLOQUE: Titulo + Boton Principal              -->
+    <!-- ============================================= -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="bi bi-cash-stack"></i> Turnos de Caja</h2>
+            <p class="text-muted mb-0">Gestiona los turnos de apertura y cierre de caja</p>
+        </div>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Nuevo Turno
+        </a>
+    </div>
+
+    @if (turnoAbierto != null)
+    {
+        <div class="card shadow-sm mb-4 border-start border-4 border-warning">
+            <div class="card-body">
+                <h5 class="text-warning fw-bold mb-1">
+                    <i class="bi bi-clock-history"></i> TURNO ABIERTO
+                </h5>
+                <div class="row g-2 mt-1">
+                    <div class="col-md-4">
+                        <small class="text-muted">Empleado:</small>
+                        <span class="fw-semibold d-block">@turnoAbierto.NombreEmpleado</span>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">Inicio:</small>
+                        <span class="fw-semibold d-block">@turnoAbierto.FechaApertura.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">Monto Inicial:</small>
+                        <span class="fw-semibold d-block">S/ @turnoAbierto.MontoInicial.ToString("N2")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ============================================= -->
+    <!-- BLOQUE 1: Panel de Filtros                    -->
+    <!-- ============================================= -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Estado</label>
+                    <select name="soloAbiertos" class="form-select">
+                        <option value="">Todos</option>
+                        @if (soloAbiertos == true)
+                        {
+                            <option value="true" selected>Abiertos</option>
+                        }
+                        else
+                        {
+                            <option value="true">Abiertos</option>
+                        }
+                        @if (soloAbiertos == false)
+                        {
+                            <option value="false" selected>Cerrados</option>
+                        }
+                        else
+                        {
+                            <option value="false">Cerrados</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Fecha Inicio</label>
+                    <input type="date" name="fechaInicio" class="form-control" value="@fechaInicio" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Fecha Fin</label>
+                    <input type="date" name="fechaFin" class="form-control" value="@fechaFin" />
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reiniciar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================= -->
+    <!-- BLOQUE 3: Tabla de Datos Principal            -->
+    <!-- ============================================= -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Empleado</th>
+                            <th>Fecha Apertura</th>
+                            <th>Fecha Cierre</th>
+                            <th>Monto Inicial</th>
+                            <th>Monto Cierre</th>
+                            <th>Observaciones</th>
+                            <th class="text-center" style="width: 180px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            @foreach (var item in Model)
+                            {
+                                var esAbierto = item.EstaAbierto;
+                                <tr class="@(!esAbierto ? "table-secondary" : "")">
+                                    <td>@item.IdTurno</td>
+                                    <td>@item.NombreEmpleado</td>
+                                    <td>@item.FechaApertura.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        @if (item.FechaCierre.HasValue)
+                                        {
+                                            @item.FechaCierre.Value.ToString("dd/MM/yyyy HH:mm")
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i> Abierto
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>S/ @item.MontoInicial.ToString("N2")</td>
+                                    <td>
+                                        @if (item.MontoCierre.HasValue)
+                                        {
+                                            @($"S/ {item.MontoCierre.Value:N2}")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.Observaciones))
+                                        {
+                                            <span title="@item.Observaciones">
+                                                @(item.Observaciones.Length > 30 ? item.Observaciones.Substring(0, 30) + "..." : item.Observaciones)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-outline-info btn-ver"
+                                                data-id="@item.IdTurno">
+                                            <i class="bi bi-eye"></i> Ver
+                                        </button>
+                                        @if (esAbierto)
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@item.IdTurno"
+                                               class="btn btn-sm btn-outline-warning">
+                                                <i class="bi bi-pencil-square"></i> Editar
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger btn-cerrar"
+                                                    data-id="@item.IdTurno"
+                                                    data-monto-inicial="@item.MontoInicial">
+                                                <i class="bi bi-lock"></i> Cerrar
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar"
+                                                    data-id="@item.IdTurno" data-empleado="@item.NombreEmpleado">
+                                                <i class="bi bi-trash"></i> Eliminar
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                    <p class="mt-2">No hay turnos registrados con los filtros seleccionados.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ============================================= -->
+<!-- MODAL: Cerrar Turno                           -->
+<!-- ============================================= -->
+<div class="modal fade" id="modalCerrar" tabindex="-1" aria-labelledby="modalCerrarLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="modalCerrarLabel">
+                    <i class="bi bi-lock"></i> Cerrar Turno de Caja
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="cerrarTurnoId" />
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Monto de Cierre <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text">S/</span>
+                        <input type="number" class="form-control" id="cerrarMontoCierre"
+                               step="0.01" min="0" placeholder="0.00" required />
+                    </div>
+                    <small class="text-muted">Monto inicial: S/ <span id="cerrarMontoInicial">0.00</span></small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Observaciones</label>
+                    <textarea class="form-control" id="cerrarObservaciones"
+                              rows="3" maxlength="200" placeholder="Observaciones de cierre (opcional)"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-danger" id="btnConfirmarCierre">
+                    <i class="bi bi-lock-fill"></i> Confirmar Cierre
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================= -->
+<!-- MODAL: Ver Detalle Turno                      -->
+<!-- ============================================= -->
+<div class="modal fade" id="modalVer" tabindex="-1" aria-labelledby="modalVerLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="modalVerLabel">
+                    <i class="bi bi-eye"></i> Detalle del Turno
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-semibold text-muted small">Empleado</label>
+                        <p class="mb-0" id="verEmpleado">-</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-muted small">Fecha Apertura</label>
+                        <p class="mb-0" id="verFechaApertura">-</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-muted small">Fecha Cierre</label>
+                        <p class="mb-0" id="verFechaCierre">-</p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold text-muted small">Monto Inicial</label>
+                        <p class="mb-0" id="verMontoInicial">-</p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold text-muted small">Monto Cierre</label>
+                        <p class="mb-0" id="verMontoCierre">-</p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold text-muted small">Estado</label>
+                        <p class="mb-0" id="verEstado">-</p>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold text-muted small">Observaciones</label>
+                        <p class="mb-0" id="verObservaciones">-</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var mensajeExito = '@TempData["Exito"]';
+            if (mensajeExito) {
+                Swal.fire({
+                    title: '!Exito!',
+                    text: mensajeExito,
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#28a745'
+                });
+            }
+
+            // ==========================================
+            // CERRAR TURNO - Boton en tabla o en alerta
+            // ==========================================
+            document.querySelectorAll('.btn-cerrar').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+                    var montoInicial = this.getAttribute('data-monto-inicial');
+                    document.getElementById('cerrarTurnoId').value = id;
+                    document.getElementById('cerrarMontoInicial').textContent = montoInicial;
+                    document.getElementById('cerrarMontoCierre').value = '';
+                    document.getElementById('cerrarObservaciones').value = '';
+                    var modal = new bootstrap.Modal(document.getElementById('modalCerrar'));
+                    modal.show();
+                });
+            });
+
+            document.getElementById('btnConfirmarCierre').addEventListener('click', function () {
+                var id = document.getElementById('cerrarTurnoId').value;
+                var montoCierre = document.getElementById('cerrarMontoCierre').value;
+                var observaciones = document.getElementById('cerrarObservaciones').value;
+
+                if (!montoCierre || parseFloat(montoCierre) < 0) {
+                    Swal.fire('Validacion', 'Ingrese un monto de cierre valido.', 'warning');
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Cerrar turno?',
+                    text: 'Se cerrara el turno con monto: S/ ' + parseFloat(montoCierre).toFixed(2),
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Si, cerrar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.showLoading();
+                        fetch('/TurnoCaja/CerrarTurno', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: 'id=' + encodeURIComponent(id) +
+                                  '&montoCierre=' + encodeURIComponent(montoCierre) +
+                                  '&observaciones=' + encodeURIComponent(observaciones)
+                        })
+                        .then(function (res) { return res.json(); })
+                        .then(function (data) {
+                            Swal.close();
+                            if (data.success) {
+                                Swal.fire({
+                                    title: 'Cerrado!',
+                                    text: data.message,
+                                    icon: 'success',
+                                    confirmButtonText: 'OK',
+                                    confirmButtonColor: '#28a745'
+                                }).then(function () {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire('Error', data.message, 'error');
+                            }
+                        })
+                        .catch(function (err) {
+                            Swal.close();
+                            Swal.fire('Error', 'Ocurrio un error al cerrar el turno: ' + err.message, 'error');
+                        });
+                    }
+                });
+            });
+
+            // ==========================================
+            // VER DETALLE - Boton en tabla
+            // ==========================================
+            document.querySelectorAll('.btn-ver').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+                    fetch('/TurnoCaja/ObtenerPorId?id=' + encodeURIComponent(id))
+                        .then(function (res) { return res.json(); })
+                        .then(function (data) {
+                            if (data.success) {
+                                var t = data.turno;
+                                document.getElementById('verEmpleado').textContent = t.nombreEmpleado;
+                                document.getElementById('verFechaApertura').textContent = t.fechaApertura;
+                                document.getElementById('verFechaCierre').textContent = t.fechaCierre || '-';
+                                document.getElementById('verMontoInicial').textContent = 'S/ ' + parseFloat(t.montoInicial).toFixed(2);
+                                document.getElementById('verMontoCierre').textContent = t.montoCierre ? 'S/ ' + parseFloat(t.montoCierre).toFixed(2) : '-';
+                                document.getElementById('verEstado').innerHTML = t.estaAbierto
+                                    ? '<span class="badge bg-success">Abierto</span>'
+                                    : '<span class="badge bg-danger">Cerrado</span>';
+                                document.getElementById('verObservaciones').textContent = t.observaciones || '-';
+                                var modal = new bootstrap.Modal(document.getElementById('modalVer'));
+                                modal.show();
+                            }
+                        })
+                        .catch(function () {
+                            Swal.fire('Error', 'No se pudo obtener el detalle.', 'error');
+                        });
+                });
+            });
+
+            // ==========================================
+            // ELIMINAR TURNO
+            // ==========================================
+            document.querySelectorAll('.btn-eliminar').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+                    var empleado = this.getAttribute('data-empleado');
+
+                    Swal.fire({
+                        title: 'Esta seguro?',
+                        text: "Se eliminara el turno de " + empleado + "?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Si, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch('/TurnoCaja/Delete', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: 'id=' + encodeURIComponent(id)
+                            })
+                            .then(function (res) { return res.json(); })
+                            .then(function (data) {
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: 'Eliminado!',
+                                        text: data.message,
+                                        icon: 'success',
+                                        confirmButtonText: 'OK',
+                                        confirmButtonColor: '#28a745'
+                                    }).then(function () {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire('Error', data.message, 'error');
+                                }
+                            })
+                            .catch(function () {
+                                Swal.fire('Error', 'Ocurrio un error al eliminar.', 'error');
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}

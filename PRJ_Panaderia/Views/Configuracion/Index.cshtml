@@ -1,0 +1,73 @@
+@model PRJ_Panaderia.Models.ConfiguracionSistema
+
+@{
+    ViewData["Title"] = "Configuración del Sistema";
+}
+
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="bi bi-gear"></i> Configuración del Sistema</h2>
+            <p class="text-muted mb-0">Parámetros generales del negocio</p>
+        </div>
+        <a asp-action="Edit" class="btn btn-dark">
+            <i class="bi bi-pencil-square"></i> Editar Configuración
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Configuración Actual</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Nombre del Negocio</label>
+                            <p class="mb-0">@Model.NombreNegocio</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">RUC</label>
+                            <p class="mb-0">@Model.RUC</p>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold text-muted small">Razón Social</label>
+                            <p class="mb-0">@Model.RazonSocial</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">IGV %</label>
+                            <p class="mb-0">@Model.IGV_Porcentaje.ToString("N2")%</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Moneda</label>
+                            <p class="mb-0">
+                                <span class="badge bg-secondary">@Model.Moneda</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Numero Yape</label>
+                            <p class="mb-0">@(Model.NumeroYape ?? "No configurado")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Correo del Sistema</label>
+                            <p class="mb-0">@(Model.Correo ?? "No configurado")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var msg = document.getElementById('msgExito');
+            if (msg && msg.value) {
+                Swal.fire({ title: 'Exito!', text: msg.value, icon: 'success', confirmButtonText: 'OK', confirmButtonColor: '#28a745' });
+            }
+        });
+    </script>
+    <input type="hidden" id="msgExito" value="@((TempData["Exito"] ?? "").ToString())" />
+}

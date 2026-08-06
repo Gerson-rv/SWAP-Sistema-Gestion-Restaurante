@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset='utf-8'></head>
+<body style='font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:20px;'>
+<div style='max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.1);'>
+
+    <!-- Header -->
+    <div style='background:#1a1a2e;color:#fff;padding:25px;text-align:center;'>
+        <div style='font-size:40px;margin-bottom:8px;'>&#x1F7E2;</div>
+        <h1 style='margin:0;font-size:24px;font-weight:bold;'>TE ACABAN DE YAPEAR!</h1>
+    </div>
+
+    <div style='padding:30px;'>
+        <p style='margin:0 0 5px;font-size:16px;color:#333;'>Hola, <strong>{{NOMBRE_NEGOCIO}}</strong>,</p>
+        <p style='margin:0 0 25px;font-size:15px;color:#555;'>&#x2705; Se ha registrado un pago con Yape en tu restaurante.</p>
+
+        <!-- Monto -->
+        <div style='text-align:center;padding:20px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;margin-bottom:25px;'>
+            <p style='margin:0 0 5px;font-size:13px;color:#666;text-transform:uppercase;letter-spacing:1px;'>&#x1F4B0; MONTO DEL YAPEO</p>
+            <p style='margin:0;font-size:36px;font-weight:bold;color:#16a34a;'>S/ {{MONTO}}</p>
+        </div>
+
+        <!-- Detalles -->
+        <div style='padding:20px;background:#f8f9fa;border-radius:8px;margin-bottom:25px;'>
+            <p style='margin:0 0 15px;font-size:15px;font-weight:bold;color:#333;'>&#x1F4CB; DETALLES DE LA OPERACION</p>
+            <table style='width:100%;border-collapse:collapse;'>
+                <tr>
+                    <td style='padding:8px 0;color:#666;font-size:14px;border-bottom:1px solid #e5e7eb;'>Titular de cuenta</td>
+                    <td style='padding:8px 0;font-weight:600;font-size:14px;border-bottom:1px solid #e5e7eb;text-align:right;'>{{TITULAR_CUENTA}}</td>
+                </tr>
+                <tr>
+                    <td style='padding:8px 0;color:#666;font-size:14px;border-bottom:1px solid #e5e7eb;'>Numero del yapero</td>
+                    <td style='padding:8px 0;font-weight:600;font-size:14px;border-bottom:1px solid #e5e7eb;text-align:right;'>{{NUMERO_YAPERO}}</td>
+                </tr>
+                <tr>
+                    <td style='padding:8px 0;color:#666;font-size:14px;border-bottom:1px solid #e5e7eb;'>Fecha y Hora</td>
+                    <td style='padding:8px 0;font-weight:600;font-size:14px;border-bottom:1px solid #e5e7eb;text-align:right;'>{{FECHA}}</td>
+                </tr>
+                <tr>
+                    <td style='padding:8px 0;color:#666;font-size:14px;border-bottom:1px solid #e5e7eb;'>Celular Beneficiario</td>
+                    <td style='padding:8px 0;font-weight:600;font-size:14px;border-bottom:1px solid #e5e7eb;text-align:right;'>{{CELULAR_BENEFICIARIO}}</td>
+                </tr>
+                <tr>
+                    <td style='padding:8px 0;color:#666;font-size:14px;'>N de Operacion</td>
+                    <td style='padding:8px 0;font-weight:600;font-size:14px;text-align:right;'>{{NRO_OPERACION}}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Estado -->
+        <div style='text-align:center;padding:15px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;margin-bottom:25px;'>
+            <p style='margin:0;font-size:16px;font-weight:bold;color:#16a34a;'>&#x1F7E2; ESTADO: PAGO CONFIRMADO</p>
+        </div>
+
+        <!-- Footer -->
+        <hr style='margin:0 0 20px;border:none;border-top:1px solid #e5e7eb;'>
+        <div style='text-align:center;'>
+            <p style='margin:0;font-size:18px;font-weight:bold;color:#212529;'>&#x1F35C; {{RAZON_SOCIAL}}</p>
+            <p style='margin:5px 0 15px;font-style:italic;color:#666;'>Sabor que une tradicion</p>
+            <p style='margin:0;font-size:12px;color:#999;'>Este es un correo automatico, por favor no responder.</p>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,92 @@
+@model (PRJ_Panaderia.Models.Pedido pedido, List<PRJ_Panaderia.Models.DetallePedido> detalles)
+
+@{
+    ViewData["Title"] = "Impresión - Comanda";
+    Layout = null;
+    var p = Model.pedido;
+    var items = Model.detalles;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Comanda C-@p.PedidoID.ToString("D4")</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/impresion.css" />
+</head>
+<body>
+    <div class="dp-impresion-container">
+        <div class="dp-impresion-card">
+            <!-- Header -->
+            <div class="dp-impresion-header">
+                <h2>COMANDA C-@p.PedidoID.ToString("D4")</h2>
+            </div>
+
+            <!-- Info -->
+            <div class="dp-impresion-info">
+                <p><strong>Fecha:</strong> @p.FechaHora.ToString("dd/MM/yyyy HH:mm")</p>
+                <p>
+                    <strong>Mesa:</strong>
+                    @if (p.MesaID.HasValue && p.NumeroMesa > 0)
+                    {
+                        <span>@p.NumeroMesa</span>
+                    }
+                    else
+                    {
+                        <span>Para llevar</span>
+                    }
+                </p>
+                <p><strong>Mozo:</strong> @p.NombreEmpleado</p>
+            </div>
+
+            <!-- Productos -->
+            <div class="dp-impresion-productos">
+                @foreach (var item in items)
+                {
+                    <div class="dp-impresion-producto">
+                        <span><span class="cantidad">@item.Cantidad x</span> @item.NombreProducto</span>
+                    </div>
+                }
+            </div>
+
+            <!-- Nota -->
+            @if (!string.IsNullOrEmpty(p.NotasEspeciales))
+            {
+                <div class="dp-impresion-nota">
+                    <strong>Nota:</strong> @p.NotasEspeciales
+                </div>
+            }
+
+            <!-- Footer -->
+            <div class="dp-impresion-footer">
+                <h3>CHIFA PERCY</h3>
+                <small>"Sabor que une tradición"</small>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="dp-impresion-botones">
+            <button type="button" class="btn btn-primary btn-lg" id="btnImprimir">
+                <i class="bi bi-printer"></i> IMPRIMIR
+            </button>
+            <a asp-action="Detalle" asp-route-pedidoId="@p.PedidoID" class="btn btn-secondary btn-lg">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('btnImprimir').addEventListener('click', function () {
+            fetch('/DetallePedido/MarcarServido', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'pedidoId=@p.PedidoID'
+            }).then(function () {
+                window.print();
+            });
+        });
+    </script>
+</body>
+</html>

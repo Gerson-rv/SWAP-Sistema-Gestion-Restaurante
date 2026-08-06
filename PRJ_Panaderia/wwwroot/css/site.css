@@ -1,0 +1,479 @@
+/* =============================================
+   site.css - Estilos generales del proyecto
+   ============================================= */
+
+/* ---------------------------------------------
+   TIPOGRAFÍA BASE
+   - Fuente base de 14px en móvil
+   - Fuente de 16px en tablet/desktop (768px+)
+   --------------------------------------------- */
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+/* ---------------------------------------------
+   RESET BÁSICO
+   - Altura completa del viewport
+   - Elimina márgenes y paddings del body
+   --------------------------------------------- */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---------------------------------------------
+   BODY
+   - Color de fondo gris claro (#f4f6f9)
+   - Tipografía SegUI UI con fallbacks
+   --------------------------------------------- */
+body {
+    background-color: #f4f6f9;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ---------------------------------------------
+   FOCUS (ACCESIBILIDAD)
+   - Anillo de enfoque azul para botones, inputs
+   - Mejora la visibilidad al navegar con teclado
+   --------------------------------------------- */
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+/* ---------------------------------------------
+   PLACEHOLDERS (form-floating)
+   - Placeholder alineado a la derecha por defecto
+   - Placeholder alineado a la izquierda al enfocar
+   --------------------------------------------- */
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+    color: var(--bs-secondary-color);
+    text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+    text-align: start;
+}
+
+/* ---------------------------------------------
+   CARDS
+   - Sin borde por defecto
+   - Bordes redondeados suaves (0.5rem)
+   - Header con bordes redondeados arriba
+   --------------------------------------------- */
+.card {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+}
+
+/* ---------------------------------------------
+   TABLAS
+   - Sin margen inferior
+   - Encabezados en negrita, texto pequeño,
+     mayúsculas y espaciado entre letras
+   --------------------------------------------- */
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    border-bottom: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ---------------------------------------------
+   BADGES (etiquetas de estado)
+   - Texto en negrita moderada
+   - Padding compacto
+   - Tamaño de fuente pequeño
+   --------------------------------------------- */
+.badge {
+    font-weight: 500;
+    padding: 0.4em 0.75em;
+    font-size: 0.75rem;
+}
+
+/* ---------------------------------------------
+   BOTONES
+   - Texto en negrita moderada
+   - Bordes ligeramente redondeados (0.375rem)
+   - Versión pequeña (btn-sm) más compacta
+   --------------------------------------------- */
+.btn {
+    font-weight: 500;
+    border-radius: 0.375rem;
+}
+
+.btn-sm {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.8rem;
+}
+
+/* ---------------------------------------------
+   SWITCHES (form-check)
+   - Color verde (#198754) al estar activado
+   - Consistente con el color de éxito de Bootstrap
+   --------------------------------------------- */
+.form-check-input:checked {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+/* ---------------------------------------------
+   VALIDACIÓN
+   - Mensajes de error en tamaño pequeño
+   - Legibles pero no invasivos
+   --------------------------------------------- */
+.text-danger {
+    font-size: 0.85rem;
+}
+
+/* ---------------------------------------------
+   MESA ICONS (Imágenes PNG personalizadas)
+   - Tamaño fijo de 125x125px
+   - object-fit: contain para mantener proporción
+   - Usado en el módulo Mesa (tarjetas de estado)
+   --------------------------------------------- */
+.mesa-icon {
+    width: 125px;
+    height: 125px;
+    object-fit: contain;
+}
+
+/* =============================================
+   MÓDULO: DETALLE PEDIDOS
+   - Estilos para listado, detalle e impresión
+   ============================================= */
+
+/* --- Contenedor general --- */
+.dp-container {
+    max-width: 1100px;
+}
+
+/* --- Filtros (Index) --- */
+.dp-filtros-card {
+    border-left: 4px solid #0d6efd;
+}
+
+/* --- Tabla (Index) --- */
+.dp-tabla-card {
+    border-left: 4px solid #212529;
+}
+
+.dp-comanda-badge {
+    font-size: 0.85rem;
+    padding: 0.4em 0.6em;
+}
+
+/* --- Paginación --- */
+.dp-paginacion .page-link {
+    color: #212529;
+    border-color: #dee2e6;
+}
+
+.dp-paginacion .page-item.active .page-link {
+    background-color: #212529;
+    border-color: #212529;
+    color: #fff;
+}
+
+.dp-paginacion .page-item.disabled .page-link {
+    color: #6c757d;
+}
+
+/* --- Detalle del Pedido --- */
+.dp-detalle-card {
+    border-left: 4px solid #212529;
+}
+
+.dp-detalle-card .card-header {
+    background-color: #212529 !important;
+}
+
+/* --- Totales --- */
+.dp-totales-box {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    max-width: 300px;
+    margin-left: auto;
+}
+
+.dp-total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.dp-total-grande {
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-top: 1px solid #dee2e6;
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+/* =============================================
+   MÓDULO: PAGOS
+   - Estilos para listado, registro, historial y comprobante
+   ============================================= */
+
+/* --- Contenedor general --- */
+.pg-container {
+    max-width: 1100px;
+}
+
+/* --- Filtros (Listado/Historial) --- */
+.pg-filtros-card {
+    border-left: 4px solid #198754;
+}
+
+/* --- Tabla --- */
+.pg-tabla-card {
+    border-left: 4px solid #212529;
+}
+
+/* --- Paginación --- */
+.pg-paginacion .page-link {
+    color: #212529;
+    border-color: #dee2e6;
+}
+
+.pg-paginacion .page-item.active .page-link {
+    background-color: #212529;
+    border-color: #212529;
+    color: #fff;
+}
+
+.pg-paginacion .page-item.disabled .page-link {
+    color: #6c757d;
+}
+
+/* --- Tabs de método de pago --- */
+.pg-metodo-tab {
+    border: 2px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.pg-metodo-tab:hover {
+    border-color: #0d6efd;
+    background-color: #f8f9fa;
+}
+
+.pg-metodo-tab.active,
+.pg-metodo-tab.selected {
+    border-color: #198754;
+    background-color: #d1e7dd;
+}
+
+.pg-metodo-tab i {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+/* --- Resumen de pago --- */
+.pg-resumen-box {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+}
+
+.pg-resumen-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.pg-resumen-total {
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-top: 1px solid #dee2e6;
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+/* --- Vuelto --- */
+.pg-vuelto-box {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* --- QR Container --- */
+.pg-qr-box {
+    text-align: center;
+    padding: 1rem;
+}
+
+.pg-qr-box img {
+    max-width: 200px;
+    border: 2px solid #dee2e6;
+    border-radius: 0.5rem;
+}
+
+/* --- Comprobante --- */
+.pg-comprobante {
+    max-width: 400px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+}
+
+.pg-comprobante-header {
+    text-align: center;
+    border-bottom: 2px dashed #dee2e6;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.pg-comprobante-header h5 {
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+}
+
+.pg-comprobante-detalle {
+    margin-bottom: 1rem;
+}
+
+.pg-comprobante-detalle .row {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.pg-comprobante-footer {
+    text-align: center;
+    border-top: 2px dashed #dee2e6;
+    padding-top: 1rem;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+/* --- Badges de estado de pago --- */
+.pg-badge-pagado {
+    background-color: #198754;
+    color: #fff;
+}
+
+.pg-badge-pendiente {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.pg-badge-anulado {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+/* =============================================
+   MÓDULO: AUDITORÍA
+   - Estilos para listado y reporte
+   ============================================= */
+
+.au-container {
+    max-width: 1200px;
+}
+
+.au-filtros-card {
+    border-left: 4px solid #0d6efd;
+}
+
+.au-tabla-card {
+    border-left: 4px solid #212529;
+}
+
+.au-paginacion .page-link {
+    color: #212529;
+    border-color: #dee2e6;
+}
+
+.au-paginacion .page-item.active .page-link {
+    background-color: #212529;
+    border-color: #212529;
+    color: #fff;
+}
+
+.au-paginacion .page-item.disabled .page-link {
+    color: #6c757d;
+}
+
+/* =============================================
+   RESPONSIVE - Android Tablets (max-width: 768px)
+   ============================================= */
+
+/* --- Tablas responsive (ocultar columnas menos importantes) --- */
+@media (max-width: 768px) {
+    .table thead th { font-size: 0.75rem; padding: 0.5rem; }
+    .table tbody td { font-size: 0.8rem; padding: 0.5rem; }
+
+    .btn-sm { padding: 0.2rem 0.5rem; font-size: 0.72rem; }
+
+    /* Últimos pedidos Dashboard */
+    .dp-container, .pg-container, .au-container { max-width: 100%; padding: 0.5rem; }
+
+    /* Filtros apilados */
+    .row.g-3 > [class*="col-"] { margin-bottom: 0.5rem; }
+
+    /* Mesa - 2 por fila, imágenes pequeñas */
+    .mesa-icon { width: 80px; height: 80px; }
+
+    /* Producto - imágenes más pequeñas */
+    .producto-card-img { height: 120px; }
+
+    /* Paginación compacta */
+    .pagination { gap: 0.2rem; }
+    .page-link { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+
+    /* Headers apilados */
+    .d-flex.justify-content-between { flex-wrap: wrap; gap: 0.5rem; }
+}
+
+@media (max-width: 480px) {
+    .table thead th { font-size: 0.65rem; padding: 0.35rem; }
+    .table tbody td { font-size: 0.72rem; padding: 0.35rem; }
+
+    .btn-sm { padding: 0.15rem 0.4rem; font-size: 0.68rem; }
+
+    .badge { font-size: 0.6rem; padding: 0.25em 0.45em; }
+
+    .mesa-icon { width: 55px; height: 55px; }
+
+    .producto-card-img { height: 90px; }
+
+    .dp-comanda-badge { font-size: 0.7rem; }
+
+    /* Empleados/Clientes - acciones compactas */
+    .btn-sm i.bi { font-size: 0.7rem; }
+
+    /* Headers más compactos */
+    h2 { font-size: 1.1rem; }
+    h5 { font-size: 0.95rem; }
+    .container { padding-left: 0.5rem; padding-right: 0.5rem; }
+}

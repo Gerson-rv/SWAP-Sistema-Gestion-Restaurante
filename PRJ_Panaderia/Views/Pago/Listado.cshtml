@@ -1,0 +1,155 @@
+@model IEnumerable<PRJ_Panaderia.Models.Pedido>
+
+@{
+    ViewData["Title"] = "Pagos - Pedidos Pendientes";
+    var mesas = ViewBag.Mesas as List<PRJ_Panaderia.Models.Mesa> ?? new List<PRJ_Panaderia.Models.Mesa>();
+    var empleados = ViewBag.Empleados as List<PRJ_Panaderia.Models.Empleado> ?? new List<PRJ_Panaderia.Models.Empleado>();
+    int paginaActual = ViewBag.PaginaActual ?? 1;
+    int totalPaginas = ViewBag.TotalPaginas ?? 1;
+    var busquedaFiltro = ViewBag.Busqueda as string;
+    var mesaIdFiltro = ViewBag.MesaId as int?;
+    var empleadoIdFiltro = ViewBag.EmpleadoId as int?;
+}
+
+<div class="container mt-4 pg-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-cash-coin"></i> Pagos</h2>
+        <a asp-action="Historial" class="btn btn-outline-dark">
+            <i class="bi bi-journal-text"></i> Historial
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow pg-filtros-card">
+        <div class="card-body">
+            <form method="get" asp-action="Listado" class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Buscar</label>
+                    <input type="text" name="busqueda" class="form-control" placeholder="#Pedido, Mesa..."
+                           value="@busquedaFiltro" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Mesa</label>
+                    <select name="mesaId" class="form-select">
+                        <option value="">Todas</option>
+                        @foreach (var mesa in mesas)
+                        {
+                            <option value="@mesa.IdMesa" selected="@(mesaIdFiltro == mesa.IdMesa)">Mesa @mesa.Numero</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Mozo</label>
+                    <select name="empleadoId" class="form-select">
+                        <option value="">Todos</option>
+                        @foreach (var emp in empleados)
+                        {
+                            <option value="@emp.IdEmpleado" selected="@(empleadoIdFiltro == emp.IdEmpleado)">@emp.NombreCompleto</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-5 d-flex gap-2">
+                    <button type="submit" class="btn btn-dark">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                    <a asp-action="Listado" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card shadow pg-tabla-card mt-3">
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>COMANDA</th>
+                        <th>MESA</th>
+                        <th>MOZO</th>
+                        <th>TOTAL</th>
+                        <th class="text-center" style="width: 120px;">ACCIÓN</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td><span class="badge bg-dark pg-comanda-badge">C-@item.PedidoID.ToString("D4")</span></td>
+                                <td>
+                                    @if (item.MesaID.HasValue && item.NumeroMesa > 0)
+                                    {
+                                        <span>Mesa @item.NumeroMesa</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Para llevar</span>
+                                    }
+                                </td>
+                                <td>@item.NombreEmpleado</td>
+                                <td class="fw-bold">S/ @item.Total.ToString("N2")</td>
+                                <td class="text-center">
+                                    <a asp-action="Registrar" asp-route-pedidoId="@item.PedidoID" class="btn btn-sm btn-success">
+                                        <i class="bi bi-credit-card"></i> PAGAR
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                No hay pedidos pendientes de pago.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Paginación -->
+    @if (totalPaginas > 1)
+    {
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <small class="text-muted">Página @paginaActual de @totalPaginas</small>
+            <nav>
+                <ul class="pagination pg-paginacion mb-0">
+                    <li class="page-item @(paginaActual == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-action="Listado"
+                           asp-route-pagina="@(paginaActual - 1)"
+                           asp-route-busqueda="@busquedaFiltro"
+                           asp-route-mesaId="@mesaIdFiltro"
+                           asp-route-empleadoId="@empleadoIdFiltro">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    @for (int i = 1; i <= totalPaginas; i++)
+                    {
+                        <li class="page-item @(i == paginaActual ? "active" : "")">
+                            <a class="page-link" asp-action="Listado"
+                               asp-route-pagina="@i"
+                               asp-route-busqueda="@busquedaFiltro"
+                               asp-route-mesaId="@mesaIdFiltro"
+                               asp-route-empleadoId="@empleadoIdFiltro">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(paginaActual == totalPaginas ? "disabled" : "")">
+                        <a class="page-link" asp-action="Listado"
+                           asp-route-pagina="@(paginaActual + 1)"
+                           asp-route-busqueda="@busquedaFiltro"
+                           asp-route-mesaId="@mesaIdFiltro"
+                           asp-route-empleadoId="@empleadoIdFiltro">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>

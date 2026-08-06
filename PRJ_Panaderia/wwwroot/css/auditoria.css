@@ -1,0 +1,43 @@
+/* =============================================
+   Auditoria - Reporte impreso
+   ============================================= */
+
+body { background: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; }
+
+.au-rep-container { max-width: 1000px; margin: 0 auto; }
+
+/* Cabecera del reporte */
+.au-rep-header { text-align: center; border-bottom: 2px dashed #333; padding-bottom: 10px; margin-bottom: 15px; }
+.au-rep-header h2 { font-size: 1.3rem; font-weight: bold; margin: 0; }
+
+/* Filtros aplicados */
+.au-rep-filtros { font-size: 0.85rem; margin-bottom: 15px; background: #f8f9fa; padding: 8px 12px; border-radius: 4px; }
+
+/* Pie de página */
+.au-rep-footer { text-align: center; border-top: 2px dashed #333; padding-top: 10px; margin-top: 15px; font-size: 0.8rem; color: #6c757d; }
+
+/* Botones de acción */
+.au-rep-botones { text-align: center; margin-top: 20px; }
+
+/* Tabla compacta para reporte */
+.table th { font-size: 0.75rem; text-transform: uppercase; }
+.table td { font-size: 0.8rem; }
+
+/* Impresión: ocultar botones, fondo blanco */
+@media print { body { background: white; padding: 10px; } .au-rep-botones { display: none !important; } }
+
+/* Responsive - Android Tablets */
+@media (max-width: 768px) {
+    body { padding: 10px; }
+    .au-rep-container { max-width: 100%; }
+    .au-rep-header h2 { font-size: 1.1rem; }
+    .au-rep-filtros { font-size: 0.8rem; padding: 6px 10px; }
+    .table th { font-size: 0.7rem; }
+    .table td { font-size: 0.75rem; }
+}
+
+@media (max-width: 480px) {
+    .au-rep-header h2 { font-size: 1rem; }
+    .table th { font-size: 0.65rem; }
+    .table td { font-size: 0.7rem; }
+}

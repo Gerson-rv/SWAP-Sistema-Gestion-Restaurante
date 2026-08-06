@@ -1,0 +1,346 @@
+/* =============================================
+   Pedido (POS) - Interfaz de punto de venta
+   ============================================= */
+
+/* Layout principal: grid de 2 paneles */
+.pos-container {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 1rem;
+    height: calc(100vh - 180px);
+    min-height: 500px;
+}
+
+/* Paneles de productos y carrito */
+.productos-panel, .carrito-panel {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Cabecera de cada panel */
+.panel-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.panel-header h5 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+/* Cuerpo con scroll */
+.panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+/* ---- Categorías ---- */
+.categorias-tabs {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e9ecef;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+}
+
+.categoria-tab {
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    border: 1px solid #dee2e6;
+    background: #fff;
+    color: #495057;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.categoria-tab:hover { background: #e9ecef; }
+
+.categoria-tab.active {
+    background: #212529;
+    color: #fff;
+    border-color: #212529;
+}
+
+/* ---- Grid de productos ---- */
+.productos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.75rem;
+}
+
+.producto-card {
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.producto-card:hover {
+    border-color: #212529;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.producto-img {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    background: #f8f9fa;
+}
+
+.producto-info {
+    padding: 0.6rem;
+    text-align: center;
+}
+
+.producto-nombre {
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #212529;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.producto-precio {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #198754;
+}
+
+.btn-agregar {
+    width: 100%;
+    padding: 0.35rem;
+    background: #212529;
+    color: #fff;
+    border: none;
+    font-size: 0.8rem;
+    margin-top: 0.4rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.btn-agregar:hover { background: #495057; }
+
+/* ---- Carrito ---- */
+.carrito-items {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.carrito-item {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.carrito-item-icono {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.carrito-item-info h6 { margin: 0; font-size: 0.85rem; font-weight: 600; }
+.carrito-item-info small { color: #6c757d; }
+
+.carrito-item-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.3rem;
+}
+
+.btn-cantidad {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid #dee2e6;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cantidad:hover { background: #e9ecef; }
+
+.cantidad-display {
+    font-weight: 600;
+    font-size: 0.9rem;
+    min-width: 20px;
+    text-align: center;
+}
+
+.btn-quitar {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0.25rem;
+}
+
+.carrito-item-precio { text-align: right; }
+.carrito-item-precio .precio-unitario { font-size: 0.75rem; color: #6c757d; }
+.carrito-item-precio .precio-subtotal { font-weight: 700; color: #212529; }
+
+/* ---- Notas especiales ---- */
+.notas-area {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.notas-area label { font-size: 0.8rem; font-weight: 600; color: #495057; margin-bottom: 0.3rem; }
+
+.notas-area textarea {
+    width: 100%;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    resize: none;
+    height: 50px;
+}
+
+/* ---- Totales ---- */
+.carrito-totales {
+    padding: 0.75rem 1rem;
+    border-top: 2px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+}
+
+.total-row.grand-total {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #dee2e6;
+}
+
+/* ---- Acciones del carrito ---- */
+.carrito-acciones {
+    padding: 0.75rem 1rem;
+    display: flex;
+    gap: 0.5rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.btn-descartar {
+    flex: 1;
+    padding: 0.6rem;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    color: #495057;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-descartar:hover { background: #f8f9fa; border-color: #adb5bd; }
+
+.btn-finalizar {
+    flex: 2;
+    padding: 0.6rem;
+    background: #198754;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-finalizar:hover { background: #157347; }
+.btn-finalizar:disabled { background: #6c757d; cursor: not-allowed; }
+
+/* ---- Cabecera de configuración (mesa/empleado) ---- */
+.config-bar {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.config-bar select { padding: 0.4rem 0.75rem; border: 1px solid #dee2e6; border-radius: 6px; font-size: 0.85rem; min-width: 140px; }
+.config-bar label { font-size: 0.8rem; font-weight: 600; color: #495057; }
+
+/* ---- Barra de historial ---- */
+.historial-bar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-top: 1px solid #e9ecef;
+    background: #fff;
+}
+
+.historial-bar .btn { font-size: 0.8rem; padding: 0.3rem 0.6rem; }
+
+/* ---- Estado vacío del carrito ---- */
+.carrito-empty { text-align: center; padding: 2rem 1rem; color: #adb5bd; }
+.carrito-empty i { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+/* ---- Responsive ---- */
+@media (max-width: 992px) {
+    .pos-container { grid-template-columns: 1fr; height: auto; }
+    .carrito-panel { max-height: 400px; }
+}
+
+@media (max-width: 768px) {
+    .pos-container { grid-template-columns: 1fr; gap: 0.75rem; height: auto; }
+    .productos-panel { order: 2; }
+    .carrito-panel { order: 1; max-height: 350px; border: 2px solid #198754; }
+    .productos-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.5rem; }
+    .producto-img { height: 80px; }
+    .producto-nombre { font-size: 0.75rem; }
+    .producto-precio { font-size: 0.8rem; }
+    .carrito-item { grid-template-columns: 32px 1fr auto; gap: 0.4rem; padding: 0.4rem 0.5rem; }
+    .carrito-item-icono { width: 32px; height: 32px; font-size: 0.9rem; }
+    .carrito-item-info h6 { font-size: 0.78rem; }
+    .config-bar { flex-wrap: wrap; }
+    .config-bar select { min-width: 100%; }
+    .panel-header { padding: 0.75rem 1rem; }
+    .panel-header h5 { font-size: 0.9rem; }
+}
+
+@media (max-width: 480px) {
+    .productos-grid { grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
+    .producto-img { height: 70px; }
+    .carrito-panel { max-height: 300px; }
+    .carrito-totales { padding: 0.5rem 0.75rem; }
+    .total-row { font-size: 0.8rem; }
+    .total-row.grand-total { font-size: 0.95rem; }
+}
