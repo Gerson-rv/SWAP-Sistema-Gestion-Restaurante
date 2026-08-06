@@ -336,7 +336,7 @@ builder.Services.AddScoped<EmailService>();
    ```json
    {
      "ConnectionStrings": {
-       "DefaultConnection": "Server=127.0.0.1,1433;Database=EmpresaBD;User Id=sa;Password=SQLadmin123/;TrustServerCertificate=True;"
+       "DefaultConnection": "Server=<SERVIDOR>;Database=EmpresaBD;User Id=<USUARIO>;Password=<CONTRASEÑA>;TrustServerCertificate=True;"
      }
    }
    ```
